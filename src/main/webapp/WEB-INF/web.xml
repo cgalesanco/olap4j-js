@@ -1,0 +1,15 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <servlet>
+    <servlet-name>Test Servlet</servlet-name>
+    <servlet-class>com.cgalesanco.olap4j.TestServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Test Servlet</servlet-name>
+    <url-pattern>test</url-pattern>
+  </servlet-mapping>
+  <display-name>Archetype Created Web Application</display-name>
+</web-app>
