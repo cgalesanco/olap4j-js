@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html data-ng-app="olapJsApp">
 <head>
   <link rel="stylesheet" href="css/axis.css"/>
   <script type="text/javascript">
@@ -10,10 +10,10 @@
       }
     };
   </script>
-  <script src="js/lib/require.js" data-main="js/test"></script>
+  <script src="js/lib/require.js" data-main="js/olapJsApp"></script>
 </head>
-<body>
-  <h2>Hello World!</h2>
+<body data-ng-controller="TestController">
+  <h2>{{testValue}}</h2>
 
   <div id="cellSet"></div>
 </body>
