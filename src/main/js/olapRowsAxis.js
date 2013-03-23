@@ -10,6 +10,7 @@ define(['jquery'], function ($) {
   function CellSetRowsAxis(element) {
     this.element = element;
     var self = this;
+    var columnCount;
     var expandHandler = null,
         collapseHandler = null;
 
@@ -35,18 +36,19 @@ define(['jquery'], function ($) {
       }
     }
 
+    this.element.click(clickHandler);
+
     this.setData = function (data) {
-      var table = $('<table>'),
+      var tBody = this.element,
           hierarchyCount = data[0] && data[0].length,
           cells = new Array(hierarchyCount),
           r, c, i,
           row, dataRow, dataLength,
           dataCell, cell, span;
 
-      this.element.empty();
-      table.click(clickHandler);
-      table.appendTo(this.element);
-
+      tBody.empty();
+      columnCount = hierarchyCount; // Number of columns in the axis, this will be different
+                                    // from the number of hierarchies
       for (r = 0; r < data.length; r++) {
         row = $('<tr>');
         dataRow = data[r];
@@ -86,9 +88,13 @@ define(['jquery'], function ($) {
           row.append(cell);
         }
 
-        row.appendTo(table);
+        row.appendTo(tBody);
       }
     };
+
+    this.getColumnCount = function() {
+      return columnCount;
+    }
 
     this.setExpandHandler = function (h) {
       expandHandler = h;

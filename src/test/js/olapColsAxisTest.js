@@ -1,3 +1,4 @@
+/*global describe, beforeEach, it, expect, jasmine */
 define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
   describe('The CellSetColsAxis component', function () {
     var axisPositions;
@@ -38,40 +39,42 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
         ]
       ];
 
-      elem = $(document.createElement('div'));
+      elem = $(document.createElement('thead'));
       axis = new CellSetColsAxis(elem);
       axis.setData(axisPositions);
     });
 
     it('creates a row for each hierarchy', function () {
 
-      var table = elem.children().get(0);
-      expect(table.tagName).toBe('TABLE');
+      expect(elem.prop('tagName')).toBe('THEAD');
 
       // Last row will contain a cell for each position
-      expect(elem.find('table tr').size()).toBe(axisPositions[0].length);
+      expect(elem.children('tr').size()).toBe(axisPositions[0].length);
     });
 
     it('creates a column for each position', function () {
 
-      var table = elem.children().get(0);
-      expect(table.tagName).toBe('TABLE');
+      expect(elem.prop('tagName'));
 
       // Last row will contain a cell for each position
-      expect(elem.find('table tr:eq(1) th').size()).toBe(axisPositions.length);
+      expect(elem.find('tr:eq(1) > th').size()).toBe(axisPositions.length);
+    });
+
+    it('has a method to retrieve the number of rows', function(){
+      expect(axis.getRowCount()).toBe(elem.children('tr').size());
     });
 
     it('creates a header cell for each member in a position', function () {
-      var firstRowCells = elem.find('table tr:eq(0) th');
-      var secondRowCells = elem.find('table tr:eq(1) th');
+      var firstRowCells = elem.find('tr:eq(0) th');
+      var secondRowCells = elem.find('tr:eq(1) th');
 
       expect(firstRowCells.size()).toBe(3);
       expect(secondRowCells.size()).toBe(5);
     });
 
     it('uses member caption for header cell contents (properly encoding it)', function () {
-      var firstCell = elem.find('table tr:eq(0) th:eq(0) :last');
-      var secondCell = elem.find('table tr:eq(1) th:eq(2) :last');
+      var firstCell = elem.find('tr:eq(0) th:eq(0) :last');
+      var secondCell = elem.find('tr:eq(1) th:eq(2) :last');
 
       expect(firstCell.text()).toBe(axisPositions[0][0].member.caption);
 
@@ -80,17 +83,17 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
     });
 
     it('uses member span property to set cell column span', function () {
-      var firstCell = elem.find('table tr:eq(0) th:eq(0)');
-      var secondCell = elem.find('table tr:eq(0) th:eq(1)');
+      var firstCell = elem.find('tr:eq(0) th:eq(0)');
+      var secondCell = elem.find('tr:eq(0) th:eq(1)');
 
       expect(firstCell.attr('colSpan')).toBe('3');
       expect(secondCell.attr('colSpan')).toBeUndefined();
     });
 
     it('uses member expanded property to display the expanded/collapsed control', function () {
-      var firstCell = elem.find('table tr:eq(1) th:eq(0)');
-      var secondCell = elem.find('table tr:eq(0) th:eq(1)');
-      var thirdCell = elem.find('table tr:eq(1) th:eq(1)');
+      var firstCell = elem.find('tr:eq(1) th:eq(0)');
+      var secondCell = elem.find('tr:eq(0) th:eq(1)');
+      var thirdCell = elem.find('tr:eq(1) th:eq(1)');
 
       expect(firstCell.children('.expanded').length).toBe(1);
       expect(secondCell.children('.collapsed').size()).toBe(1);
@@ -99,8 +102,8 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
     });
 
     it('properly call expand/collapse event handlers', function () {
-      var firstButton = elem.find('table tr:eq(1) th:eq(0) .expanded');
-      var secondButton = elem.find('table tr:eq(0) th:eq(1) .collapsed');
+      var firstButton = elem.find('tr:eq(1) th:eq(0) .expanded');
+      var secondButton = elem.find('tr:eq(0) th:eq(1) .collapsed');
       var expandSpy = jasmine.createSpy();
       var collapseSpy = jasmine.createSpy();
       axis.setExpandHandler(expandSpy);

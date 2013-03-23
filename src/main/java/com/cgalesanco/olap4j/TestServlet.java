@@ -18,6 +18,7 @@ import es.cgalesanco.olap4j.query.Selection;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.olap4j.Axis;
+import org.olap4j.Cell;
 import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
 import org.olap4j.OlapConnection;
@@ -33,26 +34,20 @@ public class TestServlet extends HttpServlet
     try {
       Query query = (Query) request.getSession().getAttribute("query");
       String position;
-      boolean isDrill;
-      if ( request.getParameterMap().containsKey("drill")) {
-        position = request.getParameter("drill");
-        isDrill = true;
-      } else if ( request.getParameterMap().containsKey("undrill")) {
-        position = request.getParameter("undrill");
-        isDrill = false;
-      } else {
-        return;
-      }
+      String op = request.getParameter("operation");
+      boolean isDrill = "drill".equals(op);
+
+      String[] memberIds = request.getParameterValues("position[]");
       Cube cube = query.getCube();
-      String[] memberIds = position.split(",");
       Member[] members = new Member[memberIds.length];
       for (int i = 0; i < members.length; ++i) {
         members[i] = cube.lookupMember(IdentifierNode.parseIdentifier(memberIds[i]).getSegmentList());
       }
+      Axis axis = Axis.Factory.forOrdinal(Integer.parseInt(request.getParameter("axis")));
       if ( isDrill )
-        query.getAxis(Axis.ROWS).drill(members);
+        query.getAxis(axis).drill(members);
       else
-        query.getAxis(Axis.ROWS).undrill(members);
+        query.getAxis(axis).undrill(members);
 
       executeQuery(response, query);
     } catch (OlapException e) {
@@ -100,10 +95,40 @@ public class TestServlet extends HttpServlet
 
   private void executeQuery(final HttpServletResponse response, final Query q) throws OlapException, IOException {
     CellSet cs = q.execute();
-    CellSetAxis axis = cs.getAxes().get(Axis.ROWS.axisOrdinal());
+    CellSetAxisMapper mapper = new CellSetAxisMapper();
     response.setContentType("application/json");
     JsonGenerator json = new JsonFactory().createJsonGenerator(response.getOutputStream());
-    new CellSetAxisMapper().toJson(json, q, axis);
+    json.writeStartObject();
+
+    json.writeFieldName("colsAxis");
+    CellSetAxis colsAxis = cs.getAxes().get(Axis.COLUMNS.axisOrdinal());
+    mapper.toJson(json, q, colsAxis);
+
+    json.writeFieldName("rowsAxis");
+    CellSetAxis rowsAxis = cs.getAxes().get(Axis.ROWS.axisOrdinal());
+    mapper.toJson(json, q, rowsAxis);
+
+    json.writeFieldName("data");
+    int columnCount = colsAxis.getPositionCount();
+    int rowCount = rowsAxis.getPositionCount();
+    json.writeStartArray();
+    for(int row = 0; row < rowCount; ++row) {
+      json.writeStartArray();
+      for(int col = 0; col < columnCount; ++col) {
+        Cell cell = cs.getCell(row*columnCount+col);
+        if ( cell.isEmpty() ) {
+          json.writeString("");
+        } else if ( cell.isNull() ) {
+          json.writeNull();
+        } else {
+          json.writeNumber(cell.getDoubleValue());
+        }
+      }
+      json.writeEndArray();
+    }
+    json.writeEndArray();
+
+    json.writeEndObject();
     json.flush();
   }
 }

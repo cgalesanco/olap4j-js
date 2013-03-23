@@ -4,6 +4,7 @@ define(['jquery'], function(){
   function CellSetRowsAxis(element) {
     this.element = element;
     var self = this;
+    var rowCount;
     var expandHandler = null,
         collapseHandler = null;
 
@@ -29,20 +30,21 @@ define(['jquery'], function(){
       }
     }
 
+    this.element.click(clickHandler);
     this.setData = function(data) {
-      var table = $('<table>'), rows, c, r, cell, span,
+      var tHead = this.element, rows, c, r, cell, span,
           hierarchyCount = data[0] && data[0].length;
 
-      this.element.empty();
-      table.click(clickHandler);
-      table.appendTo(this.element);
+      rowCount = hierarchyCount; // Number of rows in the axis, this will be different
+                                 // from the number of hierarchies/
+      tHead.empty();
       this.element.addClass('cgaoAxis');
 
 
       rows = [];
       for(r = 0; r < hierarchyCount; r++) {
         rows[r] = $(document.createElement("tr"));
-        rows[r].appendTo(table);
+        rows[r].appendTo(tHead);
       }
 
       for(c = 0; c < data.length; c++) {
@@ -81,6 +83,10 @@ define(['jquery'], function(){
         }
       }
     };
+
+    this.getRowCount = function() {
+      return rowCount;
+    }
 
     this.setExpandHandler = function (h) {
       expandHandler = h;
