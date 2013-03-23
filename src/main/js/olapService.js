@@ -58,7 +58,7 @@ define(['jquery'],function($){
       drillUndrill('drill', axisOrdinal, position, options);
     }
 
-    this.udrill = function(axisOrdinal,position, options){
+    this.undrill = function(axisOrdinal,position, options){
       drillUndrill('undrill', axisOrdinal, position, options);
     }
   }
