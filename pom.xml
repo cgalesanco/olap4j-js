@@ -12,18 +12,50 @@
       <url>http://repository.pentaho.org/artifactory/pentaho/</url>
       <name>Pentaho Repository</name>
     </repository>
-    <repository>
+  </repositories>
+
+  <pluginRepositories>
+    <!--
+    Pentaho repositores must be configured also as plugin repositories to resolve Jetty plugin dependencies on
+    Mondrian for testing.
+    -->
+    <pluginRepository>
+      <id>pentaho</id>
+      <url>http://repository.pentaho.org/artifactory/pentaho/</url>
+      <name>Pentaho Repository</name>
+    </pluginRepository>
+    <pluginRepository>
       <id>pentaho-thirdparty</id>
       <url>http://repository.pentaho.org/artifactory/third-party/</url>
       <name>Pentaho Third Party Repository</name>
-    </repository>
-  </repositories>
+    </pluginRepository>
+  </pluginRepositories>
 
   <properties>
     <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-web-api</artifactId>
+      <version>6.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
+      <version>1.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+      <version>1.16</version>
+    </dependency>
+
+
     <dependency>
       <groupId>cgalesanco</groupId>
       <artifactId>olap4j-query</artifactId>
@@ -33,12 +65,8 @@
       <groupId>org.olap4j</groupId>
       <artifactId>olap4j</artifactId>
       <version>1.1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
-      <version>1.8.9</version>
+      <!-- Will be loaded by the container to configure the olap4j data source -->
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -48,28 +76,9 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.4</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>mondrian</artifactId>
-      <version>3.5.0</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.9.1.0</version>
-      <scope>runtime</scope>
-    </dependency>
   </dependencies>
   <build>
-    <finalName>Olap4j</finalName>
+    <finalName>olap4j-js</finalName>
 
     <plugins>
       <!-- Jasmine Plugin ===============================================
@@ -82,15 +91,15 @@
         <groupId>com.github.searls</groupId>
         <artifactId>jasmine-maven-plugin</artifactId>
         <version>1.3.1.1-SNAPSHOT</version>
-<!-- Removed test execution because of HtmlUnit errors
-        <executions>
-          <execution>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
--->
+        <!-- Removed test execution because of HtmlUnit errors
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>test</goal>
+                    </goals>
+                  </execution>
+                </executions>
+        -->
         <configuration>
           <srcDirectoryName>js</srcDirectoryName>
           <libDirectoryName>js/lib</libDirectoryName>
@@ -137,8 +146,10 @@
         <version>1.0.1</version>
         <configuration>
           <excludes>
-            <exclude>require-config.js</exclude>  <!-- Excludes RequireJS config for Jasmine -->
-            <exclude>lib/**/*</exclude>           <!-- Excludes third party libraries -->
+            <exclude>require-config.js</exclude>
+            <!-- Excludes RequireJS config for Jasmine -->
+            <exclude>lib/**/*</exclude>
+            <!-- Excludes third party libraries -->
           </excludes>
         </configuration>
       </plugin>
@@ -160,6 +171,45 @@
             </connector>
           </connectors>
         </configuration>
+        <dependencies>
+          <!--
+            Dependencies required to configure Jetty with the olap4j data source
+          -->
+          <dependency>
+            <!-- Mondrian Driver -->
+            <groupId>pentaho</groupId>
+            <artifactId>mondrian</artifactId>
+            <version>3.5.0</version>
+            <exclusions>
+              <!--
+                Excludes javax.servlet.* dependencies to avoid clash with Jetty implementation
+              -->
+              <exclusion>
+                <groupId>javax.servlet</groupId>
+                <artifactId>jsp-api</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+
+          <!-- olap4j API -->
+          <dependency>
+            <groupId>org.olap4j</groupId>
+            <artifactId>olap4j</artifactId>
+            <version>1.1.0</version>
+          </dependency>
+
+          <!-- Derby, underlying JDBC used to configure the Mondrian data source -->
+          <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.9.1.0</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

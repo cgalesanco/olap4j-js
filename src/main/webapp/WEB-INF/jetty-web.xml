@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+
+  <New id="LMSDB" class="org.eclipse.jetty.plus.jndi.Resource">
+    <Arg></Arg>
+    <Arg>jdbc/DB</Arg>
+    <Arg>
+      <New class="com.cgalesanco.olap4j.MondrianDataSource">
+        <Set name="jdbcUrl">jdbc:mondrian:JdbcDrivers=org.apache.derby.jdbc.EmbeddedDriver;Jdbc=jdbc:derby:/Users/cesar/foodmart;JdbcUser=sa;JdbcPassword=;Catalog=file:/Users/cesar/FoodMart.xml</Set>
+      </New>
+    </Arg>
+  </New>
+</Configure>
