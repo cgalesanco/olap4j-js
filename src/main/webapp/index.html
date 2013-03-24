@@ -15,9 +15,24 @@
 <body data-ng-controller="QueryCtrl">
   <div data-olap-cellset='query'></div>
 
-  <ul>
-    <li data-ng-repeat="hierarchy in hierarchies">{{hierarchy.caption}}</li>
-  </ul>
+  <div>
+    <h3>Row Hierarchies</h3>
+    <ul>
+      <li data-ng-repeat="hierarchy in query.rowsAxis.hierarchies">{{hierarchy.caption}}</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Column Hierarchies</h3>
+    <ul>
+      <li data-ng-repeat="hierarchy in query.colsAxis.hierarchies">{{hierarchy.caption}}</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Unused Hierarchies</h3>
+    <ul>
+      <li data-ng-repeat="hierarchy in hierarchies|filter:notUsedHierarchy">{{hierarchy.caption}}</li>
+    </ul>
+  </div>
 </body>
 
 </html>

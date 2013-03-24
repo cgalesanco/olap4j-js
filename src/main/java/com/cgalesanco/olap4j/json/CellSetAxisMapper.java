@@ -60,7 +60,7 @@ public class CellSetAxisMapper
 
   private void writeHierarchy(final JsonGenerator json, final Hierarchy hierarchy) throws IOException {
     json.writeStartObject();
-    json.writeStringField("name", hierarchy.getUniqueName());
+    json.writeStringField("uniqueName", hierarchy.getUniqueName());
     json.writeStringField("caption", hierarchy.getCaption());
     json.writeEndObject();
   }

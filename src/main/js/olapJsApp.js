@@ -16,6 +16,28 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
         $http.get('/rest/query/hierarchies').success(function(data){
           $scope.hierarchies = data;
           });
+
+        $scope.notUsedHierarchy = function(h){
+          var axisHierarchy;
+          if ( !$scope.query ) {
+            return true;
+          }
+
+
+          for(var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
+            axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
+            if ( axisHierarchy.name === h.uniqueName )
+              return false;
+          }
+
+          for(var hierarchyIdx in $scope.query.colsAxis.hierarchies) {
+            axisHierarchy = $scope.query.colsAxis.hierarchies[hierarchyIdx];
+            if ( axisHierarchy.name === h.uniqueName )
+              return false;
+          }
+
+          return true;
+        }
         }]).
 
         directive('olapCellset', function(){
