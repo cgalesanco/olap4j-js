@@ -19,6 +19,7 @@ import javax.xml.ws.WebServiceException;
 
 import com.sun.jersey.spi.container.servlet.PerSession;
 import es.cgalesanco.olap4j.query.Query;
+import es.cgalesanco.olap4j.query.QueryAxis;
 import es.cgalesanco.olap4j.query.QueryHierarchy;
 import es.cgalesanco.olap4j.query.Selection;
 import org.olap4j.Axis;
@@ -43,11 +44,7 @@ public class QueryController
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public QueryCellSet executeQuery() {
-    try {
-      return new QueryCellSet(_query, _query.execute());
-    } catch (OlapException e) {
-      throw new WebServiceException(e);
-    }
+    return doExecuteQuery();
   }
 
   @POST
@@ -56,15 +53,11 @@ public class QueryController
   public QueryCellSet drill(
     @FormParam("axis") int axisOrdinal,
     @FormParam("position[]") List<String> memberIds) {
-    try {
-      Member[] members = parsePosition(memberIds);
-      Axis queryAxis = Axis.Factory.forOrdinal(axisOrdinal);
-      _query.getAxis(queryAxis).drill(members);
+    Member[] members = parsePosition(memberIds);
+    Axis queryAxis = Axis.Factory.forOrdinal(axisOrdinal);
+    _query.getAxis(queryAxis).drill(members);
 
-      return new QueryCellSet(_query, _query.execute());
-    } catch (OlapException e) {
-      throw new WebServiceException(e);
-    }
+    return doExecuteQuery();
   }
 
   @POST
@@ -73,18 +66,34 @@ public class QueryController
   public QueryCellSet undrill(
     @FormParam("axis") int axisOrdinal,
     @FormParam("position[]") List<String> memberIds) {
-    try {
-      Member[] members = parsePosition(memberIds);
-      Axis queryAxis = Axis.Factory.forOrdinal(axisOrdinal);
-      _query.getAxis(queryAxis).undrill(members);
+    Member[] members = parsePosition(memberIds);
+    Axis queryAxis = Axis.Factory.forOrdinal(axisOrdinal);
+    _query.getAxis(queryAxis).undrill(members);
 
-      return new QueryCellSet(_query, _query.execute());
-    } catch (OlapException e) {
-      throw new WebServiceException(e);
-    }
+    return doExecuteQuery();
   }
 
-  @GET
+  @POST
+  @Path("/hierarchies/add")
+  @Produces(MediaType.APPLICATION_JSON)
+  public QueryCellSet addHierarchy(@FormParam("axis") int axisOrdinal, @FormParam("hierarchy") String hierarchyName) {
+    QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(axisOrdinal));
+    axis.addHierarchy(_query.getHierarchy(hierarchyName));
+
+    return doExecuteQuery();
+  }
+
+  @POST
+  @Path("/hierarchies/remove")
+  @Produces(MediaType.APPLICATION_JSON)
+  public QueryCellSet removeHierarchy(@FormParam("axis") int axisOrdinal, @FormParam("hierarchy") String hierarchyName) {
+    QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(axisOrdinal));
+    QueryHierarchy hierarchy = _query.getHierarchy(hierarchyName);
+    axis.removeHierarchy(hierarchy);
+
+    return doExecuteQuery();
+  }
+
   @Path("/hierarchies")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HierarchyInfo> getHierarchies() {
@@ -96,13 +105,25 @@ public class QueryController
     return result;
   }
 
-  private Member[] parsePosition(final List<String> memberIds) throws OlapException {
-    Cube cube = _query.getCube();
-    Member[] members = new Member[memberIds.size()];
-    for (int i = 0; i < members.length; ++i) {
-      members[i] = cube.lookupMember(IdentifierNode.parseIdentifier(memberIds.get(i)).getSegmentList());
+  private QueryCellSet doExecuteQuery() {
+    try {
+      return new QueryCellSet(_query, _query.execute());
+    } catch (OlapException e) {
+      throw new WebServiceException(e);
     }
-    return members;
+  }
+
+  private Member[] parsePosition(final List<String> memberIds) {
+    try {
+      Cube cube = _query.getCube();
+      Member[] members = new Member[memberIds.size()];
+      for (int i = 0; i < members.length; ++i) {
+        members[i] = cube.lookupMember(IdentifierNode.parseIdentifier(memberIds.get(i)).getSegmentList());
+      }
+      return members;
+    } catch (OlapException e) {
+      throw new WebServiceException(e);
+    }
   }
 
   private Query createQuery() {
@@ -151,10 +172,12 @@ public class QueryController
       _caption = h.getCaption();
     }
 
+    @SuppressWarnings("unused")
     public String getUniqueName() {
       return _uniqueName;
     }
 
+    @SuppressWarnings("unused")
     public String getCaption() {
       return _caption;
     }
