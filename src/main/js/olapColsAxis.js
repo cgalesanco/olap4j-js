@@ -1,12 +1,12 @@
 /*global define */
-define(['jquery'], function(){
+define(['jquery'], function($){
 
   function CellSetRowsAxis(element) {
-    this.element = element;
-    var self = this;
-    var rowCount;
-    var expandHandler = null,
+    var self = this,
+        rowCount,
+        expandHandler = null,
         collapseHandler = null;
+    this.element = element;
 
     function clickHandler(e) {
       var target = $(e.target),
@@ -86,7 +86,7 @@ define(['jquery'], function(){
 
     this.getRowCount = function() {
       return rowCount;
-    }
+    };
 
     this.setExpandHandler = function (h) {
       expandHandler = h;

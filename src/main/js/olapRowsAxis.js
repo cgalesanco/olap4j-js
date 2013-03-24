@@ -8,11 +8,11 @@ define(['jquery'], function ($) {
    * @constructor
    */
   function CellSetRowsAxis(element) {
-    this.element = element;
-    var self = this;
-    var columnCount;
-    var expandHandler = null,
+    var self = this,
+        columnCount,
+        expandHandler = null,
         collapseHandler = null;
+    this.element = element;
 
     function clickHandler(e) {
       var target = $(e.target),
@@ -94,7 +94,7 @@ define(['jquery'], function ($) {
 
     this.getColumnCount = function() {
       return columnCount;
-    }
+    };
 
     this.setExpandHandler = function (h) {
       expandHandler = h;

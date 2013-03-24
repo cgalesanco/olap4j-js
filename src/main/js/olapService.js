@@ -1,3 +1,4 @@
+/*global define */
 define(['jquery'],function($){
   function OlapService(svcUrl) {
 
@@ -20,8 +21,7 @@ define(['jquery'],function($){
     }
 
     function drillUndrill(op, axisOrdinal,position, options) {
-      var posNames = [];
-      var i;
+      var posNames = [], i;
       for(i = 0; i < position.length; ++i) {
         posNames[i] = position[i].uniqueName;
       }
@@ -36,7 +36,7 @@ define(['jquery'],function($){
         success:function(data) {
           hydrateAxisData(data.rowsAxis);
           hydrateAxisData(data.colsAxis);
-          options.success(data)
+          options.success(data);
         }
       });
     }
@@ -52,15 +52,15 @@ define(['jquery'],function($){
           options.success(data);
         }
       });
-    }
+    };
 
     this.drill = function(axisOrdinal,position, options){
       drillUndrill('drill', axisOrdinal, position, options);
-    }
+    };
 
     this.undrill = function(axisOrdinal,position, options){
       drillUndrill('undrill', axisOrdinal, position, options);
-    }
+    };
   }
   return OlapService;
 });
