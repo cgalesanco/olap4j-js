@@ -12,10 +12,12 @@
   </script>
   <script src="js/lib/require.js" data-main="js/olapJsApp"></script>
 </head>
-<body data-ng-controller="TestController">
-  <h2>{{testValue}}</h2>
+<body data-ng-controller="QueryCtrl">
+  <div data-olap-cellset='query'></div>
 
-  <div data-olap-cellset></div>
+  <ul>
+    <li data-ng-repeat="hierarchy in hierarchies">{{hierarchy.caption}}</li>
+  </ul>
 </body>
 
 </html>

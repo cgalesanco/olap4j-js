@@ -1,11 +1,24 @@
+/*global define */
 define(['jquery'], function ($) {
-  function CellSetTable(parent, olapService, CellSetRowsAxis, CellSetColsAxis) {
-    var self = this;
-    var service = olapService;
-    var table = $(document.createElement('table'));
-    var tHead = $(document.createElement('thead'));
-    var tBody = $(document.createElement('tbody'));
-    var rowsAxis, colsAxis;
+  function CellSetTable(parent, CellSetRowsAxis, CellSetColsAxis) {
+    var self = this,
+        table = $(document.createElement('table')),
+        tHead = $(document.createElement('thead')),
+        tBody = $(document.createElement('tbody')),
+        rowsAxis, colsAxis,
+        drillHandler, undrillHandler;
+
+    function drill(axis, position) {
+      if ( drillHandler ) {
+        drillHandler(self, axis === colsAxis ? 0 : 1, position);
+      }
+    }
+
+    function undrill(axis, position) {
+      if ( undrillHandler ) {
+        undrillHandler(self, axis === colsAxis ? 0 : 1, position);
+      }
+    }
 
     tHead.appendTo(table);
     colsAxis = new CellSetColsAxis(tHead);
@@ -16,18 +29,6 @@ define(['jquery'], function ($) {
     rowsAxis = new CellSetRowsAxis(tBody);
     rowsAxis.setExpandHandler(undrill);
     rowsAxis.setCollapseHandler(drill);
-
-    function drill(axis, position) {
-      olapService.drill(axis == colsAxis ? 0 : 1, position, {
-        success: self.setData
-      });
-    }
-
-    function undrill(axis, position) {
-      olapService.undrill(axis == colsAxis ? 0 : 1, position, {
-        success: self.setData
-      });
-    }
 
     function createTitleCell() {
       var titleCell = $(document.createElement('th'));
@@ -59,9 +60,10 @@ define(['jquery'], function ($) {
       }
     };
 
-    this.init = function() {
-      service.executeQuery({success: self.setData});
-    }
+    this.setDrillHandlers = function(drill, undrill) {
+      drillHandler = drill;
+      undrillHandler = undrill;
+    };
 
     table.appendTo(parent);
   }

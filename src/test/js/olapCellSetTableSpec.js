@@ -1,7 +1,7 @@
 /*global describe, beforeEach, it, expect, jasmine */
 define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
   describe("The CellSetTable component", function(){
-    var parent, drillUrl,
+    var parent,
         mockRowsAxis, mockColsAxis,
         rowsAxisSpy, colsAxisSpy;
 
@@ -13,8 +13,8 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
       colsAxisSpy = jasmine.createSpy('CellSetColsAxis').andReturn(mockColsAxis);
     });
 
-    it("constructs rows and columns axes", function(){
-      new CellSetTable(parent, drillUrl, rowsAxisSpy, colsAxisSpy);
+    it("constructs rows and columns axes components", function(){
+      new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
 
       expect(colsAxisSpy).toHaveBeenCalled();
       expect(colsAxisSpy.mostRecentCall.args[0].prop('tagName')).toBe('THEAD');
@@ -27,60 +27,65 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
       expect(rowsParent.prop('tagName')).toBe('TABLE');
     });
 
-    it("creates a title cell in the upper left corner", function(){
+    describe('draws the pivot table on setData', function(){
       var rowsColumnCount = 3;
       var colsRowCount = 1;
 
-      mockColsAxis.setData.andCallFake(function(){
-        colsAxisSpy.mostRecentCall.args[0].html('<tr><th>Mock Axis</th></tr>');
-      });
-      mockRowsAxis.setData.andCallFake(function(){
-        rowsAxisSpy.mostRecentCall.args[0].html('<tr><th>Mock Axis</th></tr>');
-      });
+      beforeEach(function(){
+        mockColsAxis.setData.andCallFake(function(){
+          colsAxisSpy.mostRecentCall.args[0].html('' +
+              '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>' +
+              '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>' +
+              '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>');
+        });
+        mockRowsAxis.setData.andCallFake(function(){
+          rowsAxisSpy.mostRecentCall.args[0].html('' +
+              '<tr><th>Mock Row Axis</th></tr>' +
+              '<tr><th>Mock Row Axis</th></tr>');
+        });
 
-      mockColsAxis.getRowCount.andReturn(colsRowCount);
-      mockRowsAxis.getColumnCount.andReturn(rowsColumnCount);
+        mockColsAxis.getRowCount.andReturn(colsRowCount);
+        mockRowsAxis.getColumnCount.andReturn(rowsColumnCount);
+      })
 
-      var csTable = new CellSetTable(parent, drillUrl, rowsAxisSpy, colsAxisSpy);
-      csTable.setData({rowsAxis:[], colsAxis:[], data:[]});
+      it("creates a title cell in the upper left corner", function(){
+        var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
+        csTable.setData({rowsAxis:[], colsAxis:[], data:[]});
 
-      var titleCell = parent.find('table > thead > tr:first > th:first');
-      expect(titleCell.text()).toBe('\u00a0');
-      expect(titleCell.attr('rowSpan')).toBeUndefined();
-      expect(titleCell.attr('colSpan')).toBe(''+rowsColumnCount);
-    });
-
-    it("fills the table with the cell set data", function(){
-      var rowsColumnCount = 3;
-      var colsRowCount = 1;
-      var r, c, rowData, cell;
-
-      mockColsAxis.setData.andCallFake(function(){
-        colsAxisSpy.mostRecentCall.args[0].html('' +
-            '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>' +
-            '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>' +
-            '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>');
-      });
-      mockRowsAxis.setData.andCallFake(function(){
-        rowsAxisSpy.mostRecentCall.args[0].html('' +
-            '<tr><th>Mock Row Axis</th></tr>' +
-            '<tr><th>Mock Row Axis</th></tr>');
+        var titleCell = parent.find('table > thead > tr:first > th:first');
+        expect(titleCell.text()).toBe('\u00a0');
+        expect(titleCell.attr('rowSpan')).toBeUndefined();
+        expect(titleCell.attr('colSpan')).toBe(''+rowsColumnCount);
       });
 
-      mockColsAxis.getRowCount.andReturn(colsRowCount);
-      mockRowsAxis.getColumnCount.andReturn(rowsColumnCount);
+      it("calls 'setData' on rows and columns axis ", function(){
+        var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
+        var rowAxisData = {};
+        var colAxisData = {};
 
-      var csTable = new CellSetTable(parent, drillUrl, rowsAxisSpy, colsAxisSpy);
-      var expectedData = [[1,2],[3,4]];
-      csTable.setData({rowsAxis:[[]], colsAxis:[], data:expectedData});
+        csTable.setData({rowsAxis:rowAxisData, colsAxis:colAxisData, data:[]});
 
-      for(r = 0; r < expectedData.length; r++) {
-        rowData = expectedData[r];
-        for(c = 0; c < rowData.length; c++) {
-          cell = parent.find('table > tbody > tr:eq('+r+') > td:eq('+(c)+')');
-          expect(cell.text()).toBe(rowData[c].toString());
+        expect(mockRowsAxis.setData).toHaveBeenCalledWith(rowAxisData);
+        expect(mockColsAxis.setData).toHaveBeenCalledWith(colAxisData);
+      });
+
+      it("fills the table with the cell set data", function(){
+        var rowsColumnCount = 3;
+        var colsRowCount = 1;
+        var r, c, rowData, cell;
+
+        var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
+        var expectedData = [[1,2],[3,4]];
+        csTable.setData({rowsAxis:[[]], colsAxis:[], data:expectedData});
+
+        for(r = 0; r < expectedData.length; r++) {
+          rowData = expectedData[r];
+          for(c = 0; c < rowData.length; c++) {
+            cell = parent.find('table > tbody > tr:eq('+r+') > td:eq('+(c)+')');
+            expect(cell.text()).toBe(rowData[c].toString());
+          }
         }
-      }
+      });
     });
   });
 });
