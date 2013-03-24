@@ -39,9 +39,14 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
         ]
       ];
 
+      axisHierarchies = [
+        {name:'[Stores]', caption:'Stores'},
+        {name:'[Products]', caption:'Products'}
+      ];
+
       elem = $(document.createElement('thead'));
       axis = new CellSetColsAxis(elem);
-      axis.setData(axisPositions);
+      axis.setData({hierarchies:axisHierarchies, positions:axisPositions});
     });
 
     it('creates a row for each hierarchy', function () {

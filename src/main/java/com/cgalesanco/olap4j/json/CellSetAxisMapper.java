@@ -13,6 +13,7 @@ import org.codehaus.jackson.JsonGenerator;
 import org.olap4j.CellSetAxis;
 import org.olap4j.OlapException;
 import org.olap4j.Position;
+import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Member;
 
 public class CellSetAxisMapper
@@ -27,6 +28,15 @@ public class CellSetAxisMapper
       return;
     }
 
+    json.writeStartObject();
+    json.writeFieldName("hierarchies");
+    json.writeStartArray();
+    for(QueryHierarchy qh : queryAxis.getHierarchies()){
+      writeHierarchy(json, qh.getHierarchy());
+    }
+    json.writeEndArray();
+
+    json.writeFieldName("positions");
     json.writeStartArray();
 
     Position position = itPosition.next();
@@ -44,6 +54,15 @@ public class CellSetAxisMapper
     }
 
     json.writeEndArray();
+
+    json.writeEndObject();
+  }
+
+  private void writeHierarchy(final JsonGenerator json, final Hierarchy hierarchy) throws IOException {
+    json.writeStartObject();
+    json.writeStringField("name", hierarchy.getUniqueName());
+    json.writeStringField("caption", hierarchy.getCaption());
+    json.writeEndObject();
   }
 
   Map<Member,Integer> usedMembers;

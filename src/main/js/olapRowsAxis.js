@@ -40,7 +40,7 @@ define(['jquery'], function ($) {
 
     this.setData = function (data) {
       var tBody = this.element,
-          hierarchyCount = data[0] && data[0].length,
+          hierarchyCount = data && data.hierarchies.length,
           cells = new Array(hierarchyCount),
           r, c, i,
           row, dataRow, dataLength,
@@ -49,9 +49,9 @@ define(['jquery'], function ($) {
       tBody.empty();
       columnCount = hierarchyCount; // Number of columns in the axis, this will be different
                                     // from the number of hierarchies
-      for (r = 0; r < data.length; r++) {
+      for (r = 0; r < data.positions.length; r++) {
         row = $('<tr>');
-        dataRow = data[r];
+        dataRow = data.positions[r];
         dataLength = dataRow.length;
 
         // Increases span for missing columns

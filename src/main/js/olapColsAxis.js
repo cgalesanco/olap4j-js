@@ -33,7 +33,7 @@ define(['jquery'], function($){
     this.element.click(clickHandler);
     this.setData = function(data) {
       var tHead = this.element, rows, c, r, cell, span,
-          hierarchyCount = data[0] && data[0].length;
+          hierarchyCount = data && data.hierarchies.length;
 
       rowCount = hierarchyCount; // Number of rows in the axis, this will be different
                                  // from the number of hierarchies/
@@ -47,8 +47,8 @@ define(['jquery'], function($){
         rows[r].appendTo(tHead);
       }
 
-      for(c = 0; c < data.length; c++) {
-        var pos = data[c];
+      for(c = 0; c < data.positions.length; c++) {
+        var pos = data.positions[c];
         var firstRow = hierarchyCount - pos.length;
         for( r = 0; r < hierarchyCount; r++) {
           var row = rows[r];
