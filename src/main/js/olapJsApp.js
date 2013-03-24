@@ -2,7 +2,7 @@
 require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService', 'olapCellSetTable'],
     function (a, $, CellSetRowsAxis, CellSetColsAxis, OlapService, CellSetTable) {
       // TODO: Use an injectable service
-      var svc = new OlapService('/test');
+      var svc = new OlapService('/rest/query');
 
       angular.module('olapJsApp', []).
         controller('QueryCtrl', ['$scope', '$http', function ($scope, $http) {

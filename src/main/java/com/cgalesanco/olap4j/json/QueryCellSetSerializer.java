@@ -6,18 +6,66 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.cgalesanco.olap4j.QueryCellSet;
 import es.cgalesanco.olap4j.query.Query;
 import es.cgalesanco.olap4j.query.QueryAxis;
 import es.cgalesanco.olap4j.query.QueryHierarchy;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.olap4j.Axis;
+import org.olap4j.Cell;
+import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
 import org.olap4j.OlapException;
 import org.olap4j.Position;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Member;
 
-public class CellSetAxisMapper
+public class QueryCellSetSerializer extends JsonSerializer<QueryCellSet>
 {
+  @Override
+  public void serialize(final QueryCellSet queryCellSet, final JsonGenerator json, final SerializerProvider serializerProvider) throws IOException {
+    CellSet cs = queryCellSet.getCellSet();
+    Query q = queryCellSet.getQuery();
+    json.writeStartObject();
+
+    json.writeFieldName("colsAxis");
+    CellSetAxis colsAxis = cs.getAxes().get(Axis.COLUMNS.axisOrdinal());
+    toJson(json, q, colsAxis);
+
+    json.writeFieldName("rowsAxis");
+    CellSetAxis rowsAxis = cs.getAxes().get(Axis.ROWS.axisOrdinal());
+    toJson(json, q, rowsAxis);
+
+    json.writeFieldName("data");
+    int columnCount = colsAxis.getPositionCount();
+    int rowCount = rowsAxis.getPositionCount();
+    json.writeStartArray();
+    for(int row = 0; row < rowCount; ++row) {
+      json.writeStartArray();
+      for(int col = 0; col < columnCount; ++col) {
+        Cell cell = cs.getCell(row*columnCount+col);
+        if ( cell.isEmpty() ) {
+          json.writeString("");
+        } else if ( cell.isNull() ) {
+          json.writeNull();
+        } else {
+          try {
+            json.writeNumber(cell.getDoubleValue());
+          } catch (OlapException e) {
+            throw new IOException(e);
+          }
+        }
+      }
+      json.writeEndArray();
+    }
+    json.writeEndArray();
+
+    json.writeEndObject();
+
+  }
+
   public void toJson(final JsonGenerator json, final Query query, final CellSetAxis axis) throws IOException {
     QueryAxis queryAxis = query.getAxis(axis.getAxisOrdinal());
 

@@ -18,10 +18,8 @@ define(['jquery','olapService'], function($, OlapService){
 
     function testResponseHydration(request) {
       var srvData = {
-        rowsAxis: dehydratedAxis,
-        colsAxis: [
-          []
-        ],
+        rowsAxis: {positions:dehydratedAxis},
+        colsAxis: {positions:[[]]},
         data: []
       };
 
@@ -36,8 +34,8 @@ define(['jquery','olapService'], function($, OlapService){
       var data = handler.mostRecentCall.args[0];
 
       expect(data).toBe(srvData);
-      expect(data.rowsAxis[1][0].member).toBe(data.rowsAxis[0][0].member);
-      expect(data.rowsAxis[2][0].member).toBe(data.rowsAxis[0][1].member);
+      expect(data.rowsAxis.positions[1][0].member).toBe(data.rowsAxis.positions[0][0].member);
+      expect(data.rowsAxis.positions[2][0].member).toBe(data.rowsAxis.positions[0][1].member);
     }
 
     describe('to execute a query', function(){
@@ -67,7 +65,7 @@ define(['jquery','olapService'], function($, OlapService){
 
         expect(srvSpy).toHaveBeenCalled();
         var ajaxOptions = srvSpy.mostRecentCall.args[0];
-        expect(ajaxOptions.url).toBe(url);
+        expect(ajaxOptions.url).toBe(url+'/drill');
         expect(ajaxOptions.type).toBe('post');
       });
 
@@ -76,7 +74,6 @@ define(['jquery','olapService'], function($, OlapService){
 
         var postedData = srvSpy.mostRecentCall.args[0].data;
         expect(postedData.axis).toBe(axis);
-        expect(postedData.operation).toBe('drill');
         expect(postedData.position.length).toBe(2);
         expect(postedData.position[0]).toBe(pos[0].uniqueName);
         expect(postedData.position[1]).toBe(pos[1].uniqueName);

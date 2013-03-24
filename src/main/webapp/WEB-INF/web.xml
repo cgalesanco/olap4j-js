@@ -20,17 +20,8 @@
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
 
-  <servlet>
-    <servlet-name>Test Servlet</servlet-name>
-    <servlet-class>com.cgalesanco.olap4j.TestServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>Test Servlet</servlet-name>
-    <url-pattern>test</url-pattern>
-  </servlet-mapping>
-
   <resource-ref>
-    <description>Olap4j Datasource Reference</description>
+    <description>Olap4j Datasource</description>
     <res-ref-name>jdbc/DB</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>

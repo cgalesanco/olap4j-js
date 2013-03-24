@@ -27,15 +27,14 @@ define(['jquery'],function($){
       }
       $.ajax({
         type:'post',
-        url:svcUrl,
+        url:svcUrl+'/'+op,
         data : {
           axis:axisOrdinal,
-          operation:op  ,
           position:posNames
         },
         success:function(data) {
-          hydrateAxisData(data.rowsAxis);
-          hydrateAxisData(data.colsAxis);
+          hydrateAxisData(data.rowsAxis.positions);
+          hydrateAxisData(data.colsAxis.positions);
           options.success(data);
         }
       });
@@ -47,8 +46,8 @@ define(['jquery'],function($){
         type:'get',
         url:svcUrl,
         success:function(data) {
-          hydrateAxisData(data.rowsAxis);
-          hydrateAxisData(data.colsAxis);
+          hydrateAxisData(data.rowsAxis.positions);
+          hydrateAxisData(data.colsAxis.positions);
           options.success(data);
         }
       });
