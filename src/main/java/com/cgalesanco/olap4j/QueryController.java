@@ -77,10 +77,18 @@ public class QueryController
   @Path("/hierarchies/add")
   @Produces(MediaType.APPLICATION_JSON)
   public QueryCellSet addHierarchy(@FormParam("axis") int axisOrdinal, @FormParam("hierarchy") String hierarchyName) {
-    QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(axisOrdinal));
-    axis.addHierarchy(_query.getHierarchy(hierarchyName));
+    try {
+      QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(axisOrdinal));
+      final QueryHierarchy queryHierarchy = _query.getHierarchy(hierarchyName);
+      for (Member root : queryHierarchy.getHierarchy().getRootMembers()) {
+        queryHierarchy.include(Selection.Operator.DESCENDANTS, root);
+      }
+      axis.addHierarchy(queryHierarchy);
 
-    return doExecuteQuery();
+      return doExecuteQuery();
+    } catch (OlapException e) {
+      throw new WebServiceException(e);
+    }
   }
 
   @POST
@@ -94,6 +102,7 @@ public class QueryController
     return doExecuteQuery();
   }
 
+  @GET
   @Path("/hierarchies")
   @Produces(MediaType.APPLICATION_JSON)
   public List<HierarchyInfo> getHierarchies() {

@@ -26,17 +26,26 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
 
           for(var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
             axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
-            if ( axisHierarchy.name === h.uniqueName )
+            if ( axisHierarchy.uniqueName === h.uniqueName )
               return false;
           }
 
           for(var hierarchyIdx in $scope.query.colsAxis.hierarchies) {
             axisHierarchy = $scope.query.colsAxis.hierarchies[hierarchyIdx];
-            if ( axisHierarchy.name === h.uniqueName )
+            if ( axisHierarchy.uniqueName === h.uniqueName )
               return false;
           }
 
           return true;
+        }
+
+        $scope.addHierarchy = function(axis, name) {
+          svc.addHierarchy(1, name,{
+            success:function(data){
+              $scope.$apply(function($scope){
+                $scope.query = data;
+              });
+            }});
         }
         }]).
 

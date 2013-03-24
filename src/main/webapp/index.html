@@ -30,7 +30,8 @@
   <div>
     <h3>Unused Hierarchies</h3>
     <ul>
-      <li data-ng-repeat="hierarchy in hierarchies|filter:notUsedHierarchy">{{hierarchy.caption}}</li>
+      <li data-ng-repeat="hierarchy in hierarchies|filter:notUsedHierarchy">
+        <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">add</button>{{hierarchy.caption}}</li>
     </ul>
   </div>
 </body>

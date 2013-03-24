@@ -60,6 +60,23 @@ define(['jquery'],function($){
     this.undrill = function(axisOrdinal,position, options){
       drillUndrill('undrill', axisOrdinal, position, options);
     };
+
+    this.addHierarchy = function(axisOrdinal, hierarchyId, options) {
+      $.ajax({
+        type:'post',
+        url:svcUrl+'/hierarchies/add',
+        data : {
+          axis:axisOrdinal,
+          hierarchy:hierarchyId
+        },
+        success:function(data) {
+          hydrateAxisData(data.rowsAxis.positions);
+          hydrateAxisData(data.colsAxis.positions);
+          options.success(data);
+        }
+      });
+
+    }
   }
   return OlapService;
 });
