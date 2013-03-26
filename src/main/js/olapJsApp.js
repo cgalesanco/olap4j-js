@@ -23,7 +23,6 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
             return true;
           }
 
-
           for(var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
             axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
             if ( axisHierarchy.uniqueName === h.uniqueName )
@@ -47,7 +46,17 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
               });
             }});
         }
-        }]).
+
+        $scope.removeHierarchy = function(axis, name) {
+          svc.removeHierarchy(axis, name,{
+            success:function(data){
+              $scope.$apply(function($scope){
+                $scope.query = data;
+              });
+            }});
+          }
+        }
+        ]).
 
         directive('olapCellset', function(){
           var table;
@@ -68,7 +77,7 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
             scope.$watch(iAttrs.olapCellset, function(newValue){
               if ( newValue ) {
                 table.setData(newValue);
-              }
+              };
             });
 
             table.setDrillHandlers(createHandler('drill'), createHandler('undrill'));

@@ -23,6 +23,9 @@ body {
     width:  1em;
 }
 
+/**
+* Hierarchy List panel
+****************************************/
 .hierarchyList {
   position:absolute;
   right:0px;
@@ -45,4 +48,12 @@ body {
 
 .hierarchyList li {
   list-style-type:none;
+}
+
+.hierarchyList li div {
+  position:relative;
+}
+.hierarchyList li .remove {
+  position:absolute;
+  right:0px;
 }

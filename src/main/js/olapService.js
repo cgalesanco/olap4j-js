@@ -75,8 +75,23 @@ define(['jquery'],function($){
           options.success(data);
         }
       });
+    };
 
-    }
+    this.removeHierarchy = function(axisOrdinal, hierarchyId, options) {
+      $.ajax({
+        type:'post',
+        url:svcUrl+'/hierarchies/remove',
+        data : {
+          axis:axisOrdinal,
+          hierarchy:hierarchyId
+        },
+        success:function(data) {
+          hydrateAxisData(data.rowsAxis.positions);
+          hydrateAxisData(data.colsAxis.positions);
+          options.success(data);
+        }
+      });
+    };
   }
   return OlapService;
 });

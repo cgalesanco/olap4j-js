@@ -20,8 +20,10 @@
     <h3>Row Hierarchies</h3>
     <ul>
       <li data-ng-repeat="hierarchy in query.rowsAxis.hierarchies">
+        <div>
         <button type="button" data-ng-click="addHierarchy(0, hierarchy.caption)">Cols</button>
         {{hierarchy.caption}}
+        <button type="button" class="remove" data-ng-click="removeHierarchy(1, hierarchy.caption)">&times;</button></div>
       </li>
     </ul>
   </div>
@@ -29,8 +31,10 @@
     <h3>Column Hierarchies</h3>
     <ul>
       <li data-ng-repeat="hierarchy in query.colsAxis.hierarchies">
+        <div>
         <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">Rows</button>
         {{hierarchy.caption}}
+        <button type="button" class="remove" data-ng-click="removeHierarchy(0, hierarchy.caption)">&times;</button></div>
       </li>
     </ul>
   </div>
@@ -38,9 +42,11 @@
     <h3>Unused Hierarchies</h3>
     <ul>
       <li data-ng-repeat="hierarchy in hierarchies|filter:notUsedHierarchy">
+        <div>
         <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">Rows</button>
         <button type="button" data-ng-click="addHierarchy(0, hierarchy.caption)">Cols</button>
         {{hierarchy.caption}}
+        </div>
       </li>
     </ul>
   </div>
