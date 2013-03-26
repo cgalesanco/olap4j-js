@@ -1,9 +1,9 @@
-.cgaoAxis {
+body {
     font-family: Verdana, Arial, sans-serif;
     font-size:small;
 }
 
-.cgaoAxis tr:nth-child(even) {
+ .cgaoAxis tr:nth-child(even) {
     background-color: #d3d3d3;
 }
 
@@ -21,4 +21,28 @@
     display: inline-block;
     cursor: pointer;
     width:  1em;
+}
+
+.hierarchyList {
+  position:absolute;
+  right:0px;
+  bottom:0px;
+  background:lightgrey;
+  padding:10px;
+}
+
+.hierarchyList ul {
+  padding:2px;
+  background-color:white;
+  border:1px solid gray;
+  margin:0px;
+}
+
+.hierarchyList h3 {
+  margin-top:10px;
+  margin-bottom:2px;
+}
+
+.hierarchyList li {
+  list-style-type:none;
 }

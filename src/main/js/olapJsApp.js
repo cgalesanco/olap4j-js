@@ -40,7 +40,7 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
         }
 
         $scope.addHierarchy = function(axis, name) {
-          svc.addHierarchy(1, name,{
+          svc.addHierarchy(axis, name,{
             success:function(data){
               $scope.$apply(function($scope){
                 $scope.query = data;

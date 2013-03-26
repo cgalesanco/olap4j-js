@@ -3,37 +3,48 @@
 <head>
   <link rel="stylesheet" href="css/axis.css"/>
   <script type="text/javascript">
-    // TODO: Refactor this to use the same RequireJS config for the app and Jasmine Specs now at (src/main/javascript/require-config.js)
+    // TODO: Refactor this to use the same RequireJS config for the app and Jasmine Specs now at
     var require = {
-      paths : {
-        jquery : 'lib/jquery'   // jQuery registers itself with this module id
-      }
+    paths : {
+    jquery : 'lib/jquery' // jQuery registers itself with this module id
+    }
     };
   </script>
   <script src="js/lib/require.js" data-main="js/olapJsApp"></script>
 </head>
 <body data-ng-controller="QueryCtrl">
-  <div data-olap-cellset='query'></div>
+<div data-olap-cellset='query'></div>
 
+<div class="hierarchyList">
   <div>
     <h3>Row Hierarchies</h3>
     <ul>
-      <li data-ng-repeat="hierarchy in query.rowsAxis.hierarchies">{{hierarchy.caption}}</li>
+      <li data-ng-repeat="hierarchy in query.rowsAxis.hierarchies">
+        <button type="button" data-ng-click="addHierarchy(0, hierarchy.caption)">Cols</button>
+        {{hierarchy.caption}}
+      </li>
     </ul>
   </div>
   <div>
     <h3>Column Hierarchies</h3>
     <ul>
-      <li data-ng-repeat="hierarchy in query.colsAxis.hierarchies">{{hierarchy.caption}}</li>
+      <li data-ng-repeat="hierarchy in query.colsAxis.hierarchies">
+        <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">Rows</button>
+        {{hierarchy.caption}}
+      </li>
     </ul>
   </div>
   <div>
     <h3>Unused Hierarchies</h3>
     <ul>
       <li data-ng-repeat="hierarchy in hierarchies|filter:notUsedHierarchy">
-        <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">add</button>{{hierarchy.caption}}</li>
+        <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">Rows</button>
+        <button type="button" data-ng-click="addHierarchy(0, hierarchy.caption)">Cols</button>
+        {{hierarchy.caption}}
+      </li>
     </ul>
   </div>
+</div>
 </body>
 
 </html>

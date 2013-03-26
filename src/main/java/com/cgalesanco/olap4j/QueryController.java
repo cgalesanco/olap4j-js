@@ -150,7 +150,8 @@ public class QueryController
       final QueryHierarchy productHie = q.getHierarchy("Product");
       Member productRoot = productHie.getHierarchy().getRootMembers().get(0);
       productHie.include(Selection.Operator.DESCENDANTS, productRoot);
-      q.getAxis(Axis.ROWS).addHierarchy(productHie);
+      final QueryAxis axis = q.getAxis(Axis.ROWS);
+      axis.addHierarchy(productHie);
 
       final QueryHierarchy measuresHie = q.getHierarchy("Measures");
       for (Member measure : measuresHie.getHierarchy().getRootMembers()) {
