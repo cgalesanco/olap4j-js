@@ -57,3 +57,17 @@ body {
   position:absolute;
   right:0px;
 }
+
+/**
+* QueryInProgress indicator
+*/
+.modal-background {
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    min-height:100%;
+    opacity: 0.8;
+    background: black url('img/ajax-loader.gif') no-repeat center center;
+}
+
