@@ -40,16 +40,26 @@ define(['jquery'], function ($) {
 
     this.setData = function (data) {
       var tBody = this.element,
-          hierarchyCount = data && data.hierarchies.length,
-          cells = new Array(hierarchyCount),
+          hierarchyCount, positionCount,
+          cells,
           r, c, i,
           row, dataRow, dataLength,
           dataCell, cell, span;
 
+
+      if ( !data || !data.hierarchies ) {
+        hierarchyCount = 0;
+        positionCount = 0;
+      } else {
+        hierarchyCount = data.hierarchies.length;
+        positionCount = data.positions.length;
+      }
+
       tBody.empty();
+      cells = new Array(hierarchyCount);
       columnCount = hierarchyCount; // Number of columns in the axis, this will be different
                                     // from the number of hierarchies
-      for (r = 0; r < data.positions.length; r++) {
+      for (r = 0; r < positionCount; r++) {
         row = $('<tr>');
         dataRow = data.positions[r];
         dataLength = dataRow.length;

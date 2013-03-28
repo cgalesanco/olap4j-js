@@ -30,17 +30,25 @@ public class QueryCellSetSerializer extends JsonSerializer<QueryCellSet>
     Query q = queryCellSet.getQuery();
     json.writeStartObject();
 
-    json.writeFieldName("colsAxis");
-    CellSetAxis colsAxis = cs.getAxes().get(Axis.COLUMNS.axisOrdinal());
-    toJson(json, q, colsAxis);
+    int columnCount = 0;
+    int rowCount = 0;
+    final List<CellSetAxis> axes = cs.getAxes();
+    if ( axes.size() > 0 ) {
+      json.writeFieldName("colsAxis");
+      CellSetAxis colsAxis = axes.get(Axis.COLUMNS.axisOrdinal());
+      columnCount = colsAxis.getPositionCount();
+      toJson(json, q, colsAxis);
 
-    json.writeFieldName("rowsAxis");
-    CellSetAxis rowsAxis = cs.getAxes().get(Axis.ROWS.axisOrdinal());
-    toJson(json, q, rowsAxis);
+      if ( axes.size()> 1 ) {
+        json.writeFieldName("rowsAxis");
+        CellSetAxis rowsAxis = axes.get(Axis.ROWS.axisOrdinal());
+        rowCount = rowsAxis.getPositionCount();
+        toJson(json, q, rowsAxis);
+
+      }
+    }
 
     json.writeFieldName("data");
-    int columnCount = colsAxis.getPositionCount();
-    int rowCount = rowsAxis.getPositionCount();
     json.writeStartArray();
     for(int row = 0; row < rowCount; ++row) {
       json.writeStartArray();

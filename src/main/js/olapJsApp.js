@@ -19,27 +19,31 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
                     })
                   }});
                 }).
-                fail(function(){
+                error(function(){
                   $scope.queryInProgress = false;
                 });
 
             $scope.notUsedHierarchy = function (h) {
               var axisHierarchy;
               if (!$scope.query) {
-                return true;
+                return true;                                  o
               }
 
-              for (var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
-                axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
-                if (axisHierarchy.uniqueName === h.uniqueName) {
-                  return false;
+              if ($scope.query.rowsAxis && $scope.query.rowsAxis.hierarchies) {
+                for (var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
+                  axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
+                  if (axisHierarchy.uniqueName === h.uniqueName) {
+                    return false;
+                  }
                 }
               }
 
-              for (hierarchyIdx in $scope.query.colsAxis.hierarchies) {
-                axisHierarchy = $scope.query.colsAxis.hierarchies[hierarchyIdx];
-                if (axisHierarchy.uniqueName === h.uniqueName) {
-                  return false;
+              if ($scope.query.colsAxis && $scope.query.colsAxis.hierarchies) {
+                for (hierarchyIdx in $scope.query.colsAxis.hierarchies) {
+                  axisHierarchy = $scope.query.colsAxis.hierarchies[hierarchyIdx];
+                  if (axisHierarchy.uniqueName === h.uniqueName) {
+                    return false;
+                  }
                 }
               }
 

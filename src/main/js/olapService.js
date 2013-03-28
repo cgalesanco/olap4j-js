@@ -20,6 +20,16 @@ define(['jquery'],function($){
       }
     }
 
+    function postProcessData(data, options) {
+      if ( data.colsAxis ) {
+        hydrateAxisData(data.colsAxis.positions);
+        if ( data.rowsAxis ) {
+          hydrateAxisData(data.rowsAxis.positions);
+        }
+      }
+      options.success(data);
+    }
+
     function drillUndrill(op, axisOrdinal,position, options) {
       var posNames = [], i;
       for(i = 0; i < position.length; ++i) {
@@ -33,9 +43,7 @@ define(['jquery'],function($){
           position:posNames
         },
         success:function(data) {
-          hydrateAxisData(data.rowsAxis.positions);
-          hydrateAxisData(data.colsAxis.positions);
-          options.success(data);
+          postProcessData(data, options);
         }
       });
     }
@@ -46,9 +54,7 @@ define(['jquery'],function($){
         type:'get',
         url:svcUrl,
         success:function(data) {
-          hydrateAxisData(data.rowsAxis.positions);
-          hydrateAxisData(data.colsAxis.positions);
-          options.success(data);
+          postProcessData(data, options);
         }
       });
     };
@@ -70,9 +76,7 @@ define(['jquery'],function($){
           hierarchy:hierarchyId
         },
         success:function(data) {
-          hydrateAxisData(data.rowsAxis.positions);
-          hydrateAxisData(data.colsAxis.positions);
-          options.success(data);
+          postProcessData(data, options);
         }
       });
     };
@@ -86,9 +90,7 @@ define(['jquery'],function($){
           hierarchy:hierarchyId
         },
         success:function(data) {
-          hydrateAxisData(data.rowsAxis.positions);
-          hydrateAxisData(data.colsAxis.positions);
-          options.success(data);
+          postProcessData(data, options);
         }
       });
     };
