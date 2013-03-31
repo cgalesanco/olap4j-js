@@ -43,8 +43,8 @@ define(['jquery'], function ($) {
     }
 
     this.setData = function (data) {
-      colsAxis.setData(data.colsAxis);
-      rowsAxis.setData(data.rowsAxis);
+      colsAxis.setData(data.axes[0]);
+      rowsAxis.setData(data.axes[1]);
 
       createTitleCell();
 

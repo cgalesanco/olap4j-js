@@ -1,123 +1,43 @@
 /*global require, angular */
-require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService', 'olapCellSetTable'],
+require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService', 'olapCellSetTable', 'olapController'],
     function (a, $, CellSetRowsAxis, CellSetColsAxis, OlapService, CellSetTable) {
-      // TODO: Use an injectable service
-      var svc = new OlapService('/rest/query');
 
-      angular.module('olapJsApp', []).
-          controller('QueryCtrl', ['$scope', '$http', function ($scope, $http) {
-
-            $scope.queryInProgress = true;
-            $http.get('/rest/query/hierarchies').
-                success(function (data) {
-                  $scope.hierarchies = data;
-
-                  svc.executeQuery({success: function (data) {
-                    $scope.$apply(function ($scope) {
-                      $scope.query = data;
-                      $scope.queryInProgress = false;
-                    })
-                  }});
-                }).
-                error(function(){
-                  $scope.queryInProgress = false;
-                });
-
-            $scope.notUsedHierarchy = function (h) {
-              var axisHierarchy;
-              if (!$scope.query) {
-                return true;                                  o
-              }
-
-              if ($scope.query.rowsAxis && $scope.query.rowsAxis.hierarchies) {
-                for (var hierarchyIdx in $scope.query.rowsAxis.hierarchies) {
-                  axisHierarchy = $scope.query.rowsAxis.hierarchies[hierarchyIdx];
-                  if (axisHierarchy.uniqueName === h.uniqueName) {
-                    return false;
-                  }
-                }
-              }
-
-              if ($scope.query.colsAxis && $scope.query.colsAxis.hierarchies) {
-                for (hierarchyIdx in $scope.query.colsAxis.hierarchies) {
-                  axisHierarchy = $scope.query.colsAxis.hierarchies[hierarchyIdx];
-                  if (axisHierarchy.uniqueName === h.uniqueName) {
-                    return false;
-                  }
-                }
-              }
-
-              return true;
-            }
-
-            $scope.addHierarchy = function (axis, name) {
-              $scope.queryInProgress = true;
-              svc.addHierarchy(axis, name, {
-                success: function (data) {
-                  $scope.$apply(function ($scope) {
-                    $scope.query = data;
-                    $scope.queryInProgress = false;
-                  });
-                }});
-            };
-
-            $scope.removeHierarchy = function (axis, name) {
-              $scope.queryInProgress = true;
-              svc.removeHierarchy(axis, name, {
-                success: function (data) {
-                  $scope.$apply(function ($scope) {
-                    $scope.query = data;
-                    $scope.queryInProgress = false;
-                  });
-                }});
-            };
-          }
-          ]).
-
-          directive('olapCellset', function () {
+      angular.module('olapJsApp', ['appControllers'])
+          .factory('olapService',function(){
+            return new OlapService('/rest/query')
+          })
+      /**
+       * @ngdoc directive
+       * @name  olap.directive:olapCellset
+       *
+       * @element A
+       * @param   {string} query scope variable holding query data. Changes to this variable will be reflected in
+       *  the table, and expand/collapse operations on the table will modify this variable.
+       *
+       *  @description
+       *
+       *  This directive displays a pivot table to display an olap4j CellSet. The table provides controls to
+       *  drill/collapse the members shown in the axes, modifying the underlying query.
+       <doc:example>
+       <doc:source>
+       <div olap-cellset="myQuery" />
+       </doc:source>
+       </doc:example>
+       *
+       *  The generated table will look like
+       *
+       *  TODO: draw a sample table
+       *
+       */
+          .directive('olapCellset', function () {
             var table;
 
             function link(scope, iElement, iAttrs) {
-              function busyServiceCall() {
-                var callArgs = Array.prototype.slice.call(arguments);
-                var options = callArgs.splice(-1)[0];
-                var delayedOptions = {
-                  success: function (data) {
-                    options.success(data);
-                    scope.$apply(function (scope) {
-                      scope.queryInProgress = false;
-                      window.clearTimeout(timer);
-                    });
-                  },
-                  fail: function (data) {
-                    options.fail(data);
-                    scope.$apply(function (scope) {
-                      scope.queryInProgress = false;
-                      window.clearTimeout(timer);
-                    });
-                  }
-                };
-
-                var timer = window.setTimeout(function () {
-                  scope.$apply(function (scope) {
-                    scope.queryInProgress = true;
-                  });
-                }, 300);
-
-                var args = callArgs.splice(1);
-                args.push(delayedOptions);
-                arguments[0].apply(svc, args);
-              }
 
               function createHandler(opName) {
                 return function (table, axis, position) {
-                  busyServiceCall(svc[opName], axis, position, {
-                    success: function (data) {
-                      scope.$apply(function (scope) {
-                        scope[iAttrs.olapCellset] = data;
-                      });
-                    }
-                  })
+                  var query = scope.$eval(iAttrs.olapCellset);
+                  query[opName](axis, position);
                 };
               }
 

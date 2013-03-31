@@ -46,11 +46,11 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
 
         mockColsAxis.getRowCount.andReturn(colsRowCount);
         mockRowsAxis.getColumnCount.andReturn(rowsColumnCount);
-      })
+      });
 
       it("creates a title cell in the upper left corner", function(){
         var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
-        csTable.setData({rowsAxis:[], colsAxis:[], data:[]});
+        csTable.setData({axes:[[],[]], data:[]});
 
         var titleCell = parent.find('table > thead > tr:first > th:first');
         expect(titleCell.text()).toBe('\u00a0');
@@ -63,20 +63,18 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
         var rowAxisData = {};
         var colAxisData = {};
 
-        csTable.setData({rowsAxis:rowAxisData, colsAxis:colAxisData, data:[]});
+        csTable.setData({axes:[rowAxisData, colAxisData], data:[]});
 
         expect(mockRowsAxis.setData).toHaveBeenCalledWith(rowAxisData);
         expect(mockColsAxis.setData).toHaveBeenCalledWith(colAxisData);
       });
 
       it("fills the table with the cell set data", function(){
-        var rowsColumnCount = 3;
-        var colsRowCount = 1;
         var r, c, rowData, cell;
 
         var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
         var expectedData = [[1,2],[3,4]];
-        csTable.setData({rowsAxis:[[]], colsAxis:[], data:expectedData});
+        csTable.setData({axes:[[[]],[]], data:expectedData});
 
         for(r = 0; r < expectedData.length; r++) {
           rowData = expectedData[r];

@@ -1,10 +1,14 @@
-package com.cgalesanco.olap4j;
+package com.cgalesanco.olap4j.json;
 
-import com.cgalesanco.olap4j.json.QueryCellSetSerializer;
 import es.cgalesanco.olap4j.query.Query;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.olap4j.CellSet;
 
+/**
+ * JSON DTO for a {@link CellSet} instance.
+ * Holds both, the {@link CellSet} instance itself, and the {@link Query} instance used to generate it. The later is
+ * required to compute the expanded/collapsed and leaf states, for the axis member.
+ */
 @JsonSerialize(using = QueryCellSetSerializer.class)
 public class QueryCellSet
 {

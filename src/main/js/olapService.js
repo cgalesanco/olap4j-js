@@ -21,11 +21,12 @@ define(['jquery'],function($){
     }
 
     function postProcessData(data, options) {
-      if ( data.colsAxis ) {
-        hydrateAxisData(data.colsAxis.positions);
-        if ( data.rowsAxis ) {
-          hydrateAxisData(data.rowsAxis.positions);
-        }
+      if ( !data.axes ) {
+        return;
+      }
+
+      for(var i = 0;i < data.axes.length; i++ ) {
+        hydrateAxisData(data.axes[i].positions);
       }
       options.success(data);
     }
@@ -55,6 +56,9 @@ define(['jquery'],function($){
         url:svcUrl,
         success:function(data) {
           postProcessData(data, options);
+        },
+        error:function(jqXHR, textStatus, error){
+          alert(textStatus+'-'+error);
         }
       });
     };

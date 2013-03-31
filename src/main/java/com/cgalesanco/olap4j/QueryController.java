@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.ws.WebServiceException;
 
+import com.cgalesanco.olap4j.json.QueryCellSet;
 import com.sun.jersey.spi.container.servlet.PerSession;
 import es.cgalesanco.olap4j.query.Query;
 import es.cgalesanco.olap4j.query.QueryAxis;
@@ -31,22 +32,38 @@ import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Member;
 import org.olap4j.metadata.NamedList;
 
+/**
+ * JAX-RS resource providing access to an olap4j query stored in the user's session.
+ */
 @PerSession
 @Path("/query")
 public class QueryController
 {
   private Query _query;
 
+  /**
+   * Creates and initializes a query
+   */
   public QueryController() {
     _query = createQuery();
   }
 
+  /**
+   * Executes the query.
+   * @return the CellSet result.
+   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public QueryCellSet executeQuery() {
     return doExecuteQuery();
   }
 
+  /**
+   * Drills a position.
+   * @param axisOrdinal the axis ordinal for the drilled position
+   * @param memberIds the list of members for the drilled position
+   * @return the CellSet result
+   */
   @POST
   @Path("/drill")
   @Produces(MediaType.APPLICATION_JSON)
@@ -60,6 +77,12 @@ public class QueryController
     return doExecuteQuery();
   }
 
+  /**
+   * Undrills (collapse) a position
+   * @param axisOrdinal the axis for the position to collapse
+   * @param memberIds the list of members for the position to collapse
+   * @return the CellSet result
+   */
   @POST
   @Path("/undrill")
   @Produces(MediaType.APPLICATION_JSON)
@@ -73,6 +96,12 @@ public class QueryController
     return doExecuteQuery();
   }
 
+  /**
+   * Adds a new hierarchy to a query axis
+   * @param axisOrdinal the axis where the hierarchy is to be added.
+   * @param hierarchyName the unique name of the hierarchy to add.
+   * @return the CellSet result
+   */
   @POST
   @Path("/hierarchies/add")
   @Produces(MediaType.APPLICATION_JSON)
@@ -91,6 +120,12 @@ public class QueryController
     }
   }
 
+  /**
+   * Removes a hierarchy form an axis.
+   * @param axisOrdinal The axis where the hierarchy is to be removed.
+   * @param hierarchyName The unique name of the hierarchy to be removed.
+   * @return the CellSet result
+   */
   @POST
   @Path("/hierarchies/remove")
   @Produces(MediaType.APPLICATION_JSON)
@@ -102,6 +137,10 @@ public class QueryController
     return doExecuteQuery();
   }
 
+  /**
+   * All the hierarchies in the cube used by the current query.
+   * @return The list of hierarchies
+   */
   @GET
   @Path("/hierarchies")
   @Produces(MediaType.APPLICATION_JSON)
@@ -114,6 +153,10 @@ public class QueryController
     return result;
   }
 
+  /**
+   * Helper to execute the current query.
+   * @return the CellSet result.
+   */
   private QueryCellSet doExecuteQuery() {
     try {
       return new QueryCellSet(_query, _query.execute());
@@ -122,6 +165,11 @@ public class QueryController
     }
   }
 
+  /**
+   * Helper to parse a list of member unique names into the corresponding list of members.
+   * @param memberIds the list of member unique names.
+   * @return The corresponding list of members.
+   */
   private Member[] parsePosition(final List<String> memberIds) {
     try {
       Cube cube = _query.getCube();
@@ -135,6 +183,10 @@ public class QueryController
     }
   }
 
+  /**
+   * Helper to initialize a query.
+   * @return the new query.
+   */
   private Query createQuery() {
     try {
       Connection oCn = getDataSource().getConnection();
@@ -164,6 +216,10 @@ public class QueryController
     }
   }
 
+  /**
+   * Helper to retrieve the olap4j data source from JNDI
+   * @return the olap4j data source.
+   */
   private DataSource getDataSource() {
     DataSource ds;
     try {
@@ -175,6 +231,9 @@ public class QueryController
     return ds;
   }
 
+  /**
+   * DTO holding the information returned for a Hierarchy.
+   */
   private class HierarchyInfo implements Serializable
   {
     public HierarchyInfo(Hierarchy h) {

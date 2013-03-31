@@ -19,7 +19,7 @@
   <div>
     <h3>Row Hierarchies</h3>
     <ul>
-      <li data-ng-repeat="hierarchy in query.rowsAxis.hierarchies">
+      <li data-ng-repeat="hierarchy in query.axes[1].hierarchies">
         <div>
         <button type="button" data-ng-click="addHierarchy(0, hierarchy.caption)">Cols</button>
         {{hierarchy.caption}}
@@ -30,7 +30,7 @@
   <div>
     <h3>Column Hierarchies</h3>
     <ul>
-      <li data-ng-repeat="hierarchy in query.colsAxis.hierarchies">
+      <li data-ng-repeat="hierarchy in query.axes[0].hierarchies">
         <div>
         <button type="button" data-ng-click="addHierarchy(1, hierarchy.caption)">Rows</button>
         {{hierarchy.caption}}

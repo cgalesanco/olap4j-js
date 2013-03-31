@@ -18,8 +18,10 @@ define(['jquery','olapService'], function($, OlapService){
 
     function testResponseHydration(request) {
       var srvData = {
-        rowsAxis: {positions:dehydratedAxis},
-        colsAxis: {positions:[[]]},
+        axes: [
+          {positions:[[]]},
+          {positions:dehydratedAxis}
+        ],
         data: []
       };
 
@@ -34,8 +36,8 @@ define(['jquery','olapService'], function($, OlapService){
       var data = handler.mostRecentCall.args[0];
 
       expect(data).toBe(srvData);
-      expect(data.rowsAxis.positions[1][0].member).toBe(data.rowsAxis.positions[0][0].member);
-      expect(data.rowsAxis.positions[2][0].member).toBe(data.rowsAxis.positions[0][1].member);
+      expect(data.axes[1].positions[1][0].member).toBe(data.axes[1].positions[0][0].member);
+      expect(data.axes[1].positions[2][0].member).toBe(data.axes[1].positions[0][1].member);
     }
 
     describe('to execute a query', function(){
