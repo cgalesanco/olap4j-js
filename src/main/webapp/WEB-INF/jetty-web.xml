@@ -7,7 +7,7 @@
     <Arg>jdbc/DB</Arg>
     <Arg>
       <New class="com.cgalesanco.olap4j.MondrianDataSource">
-        <Set name="jdbcUrl">jdbc:mondrian:JdbcDrivers=org.apache.derby.jdbc.EmbeddedDriver;Jdbc=jdbc:derby:/Users/cesar/foodmart;JdbcUser=sa;JdbcPassword=;Catalog=file:/Users/cesar/FoodMart.xml</Set>
+        <Set name="jdbcUrl">jdbc:mondrian:JdbcDrivers=org.apache.derby.jdbc.EmbeddedDriver;Jdbc=jdbc:derby:/Users/cesar/foodmart;JdbcUser=sa;JdbcPassword=;Catalog=/users/cesar/FoodMart.xml</Set>
       </New>
     </Arg>
   </New>

@@ -224,7 +224,7 @@ public class QueryController
     DataSource ds;
     try {
       InitialContext ctxt = new InitialContext();
-      ds = (DataSource)ctxt.lookup("jdbc/DB");
+      ds = (DataSource)ctxt.lookup("java:comp/env/jdbc/DB");
     } catch (NamingException e) {
       throw new RuntimeException(e);
     }

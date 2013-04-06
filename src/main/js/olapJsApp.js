@@ -4,7 +4,7 @@ require(['lib/angular', 'jquery', 'olapRowsAxis', 'olapColsAxis', 'olapService',
 
       angular.module('olapJsApp', ['appControllers'])
           .factory('olapService',function(){
-            return new OlapService('/rest/query')
+            return new OlapService('rest/query')
           })
       /**
        * @ngdoc directive

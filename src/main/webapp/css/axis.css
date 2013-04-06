@@ -68,6 +68,6 @@ body {
     width:100%;
     min-height:100%;
     opacity: 0.8;
-    background: black url('img/ajax-loader.gif') no-repeat center center;
+    background: white url('img/ajax-loader.gif') no-repeat center center;
 }
 

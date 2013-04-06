@@ -2,6 +2,26 @@ define(['lib/angular'],function () {
   angular.module('appControllers',[])
       .controller('QueryCtrl', ['$scope','$http','olapService', function($scope, $http, svc){
         /**
+         * Updates the scope variable containing the cellset with new data and
+         * sets its drill/undrill methods so they call back the service.
+         * @param scope controller scope
+         * @param data cell set data to set
+         */
+        function updateCellSet(scope, data) {
+          scope.query = data;
+          scope.query.drill = function (axis, position) {
+            $scope.$apply(function () {
+              busyServiceCall(svc.drill, axis, position, null);
+            })
+          };
+          scope.query.undrill = function (axis, position) {
+            $scope.$apply(function () {
+              busyServiceCall(svc.undrill, axis, position, null);
+            })
+          };
+        }
+
+        /**
          * Executes an olap service call setting <code>queryInProgress=true</code>
          * if the call takes more than 300ms to execute.
          *
@@ -14,22 +34,13 @@ define(['lib/angular'],function () {
           var options = callArgs.splice(-1)[0];
           var delayedOptions = {
             success: function (data) {
+              // Calls the success method defined in the options, if any.
               if ( options && options.success ) {
                 options.success(data);
               }
 
               $scope.$apply(function (scope) {
-                scope.query = data;
-                scope.query.drill = function(axis, position) {
-                  $scope.$apply(function(){
-                    busyServiceCall(svc.drill, axis, position, null);
-                  })
-                };
-                scope.query.undrill = function(axis, position) {
-                  $scope.$apply(function(){
-                    busyServiceCall(svc.undrill, axis, position, null);
-                  })
-                };
+                updateCellSet(scope, data);
                 scope.queryInProgress = false;
                 window.clearTimeout(timer);
               });
@@ -58,7 +69,7 @@ define(['lib/angular'],function () {
 
         // Initial service call to get the CellSet for the current query.
         $scope.queryInProgress = true;
-        $http.get('/rest/query/hierarchies').
+        $http.get('rest/query/hierarchies').
             success(function (data) {
               $scope.hierarchies = data;
 

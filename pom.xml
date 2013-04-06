@@ -12,6 +12,11 @@
       <url>http://repository.pentaho.org/artifactory/pentaho/</url>
       <name>Pentaho Repository</name>
     </repository>
+    <repository>
+      <id>pentaho-thirdparty</id>
+      <url>http://repository.pentaho.org/artifactory/third-party/</url>
+      <name>Pentaho Third Party Repository</name>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -38,6 +43,39 @@
 
   <dependencies>
     <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.16</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Mondrian Driver -->
+      <groupId>pentaho</groupId>
+      <artifactId>mondrian</artifactId>
+      <version>3.5.0</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <!--
+          Excludes javax.servlet.* dependencies to avoid clash with Jetty implementation
+        -->
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>jsp-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.9.1.0</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>javax</groupId>
       <artifactId>javaee-web-api</artifactId>
       <version>6.0</version>
@@ -57,16 +95,14 @@
     </dependency>
 
     <dependency>
-      <groupId>cgalesanco</groupId>
+      <groupId>es.cgalesanco</groupId>
       <artifactId>olap4j-query</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.olap4j</groupId>
       <artifactId>olap4j</artifactId>
       <version>1.1.0</version>
-      <!-- Will be loaded by the container to configure the olap4j data source -->
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -88,6 +124,13 @@
     <finalName>olap4j-js</finalName>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
+
+
       <!-- Jasmine Plugin ===============================================
      - Configured to run Javascript unit tests
      -  mvn jasmine:bdd
