@@ -1,3 +1,4 @@
+/*
 body {
     font-family: Verdana, Arial, sans-serif;
     font-size:small;
@@ -16,11 +17,19 @@ body {
     text-align: left;
     font-weight: normal;
 }
+*/
+
+.cgaoAxis th {
+    cursor: pointer;
+    white-space:nowrap;
+}
 
 .cgaoAxis th .expanded, .collapsed {
     display: inline-block;
-    cursor: pointer;
-    width:  1em;
+}
+
+.cgaoTable td {
+    text-align:right;
 }
 
 /**

@@ -17,6 +17,10 @@
       <url>http://repository.pentaho.org/artifactory/third-party/</url>
       <name>Pentaho Third Party Repository</name>
     </repository>
+    <repository>
+      <id>desarrollo-agil</id>
+      <url>http://demo.desarrolloagil.es/nexus/content/repositories/releases/</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>

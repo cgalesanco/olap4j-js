@@ -10,7 +10,7 @@ define(['jquery'], function($){
 
     function clickHandler(e) {
       var target = $(e.target),
-          posList = target.parent().data('pos'),
+          posList = target.parents('th').data('pos'),
           pos = [],
           prevCell;
       if (!posList) {
@@ -25,12 +25,15 @@ define(['jquery'], function($){
 
       if (target.hasClass('expanded')) {
         expandHandler(self, pos);
+        e.stopPropagation();
       } else if (target.hasClass('collapsed')) {
         collapseHandler(self, pos);
+        e.stopPropagation();
       }
     }
 
     this.element.click(clickHandler);
+
     this.setData = function(data) {
       var tHead = this.element, rows, c, r, cell, span,
           hierarchyCount, positionCount;
@@ -43,14 +46,26 @@ define(['jquery'], function($){
         positionCount = data.positions.length;
       }
 
-      rowCount = hierarchyCount; // Number of rows in the axis, this will be different
-                                 // from the number of hierarchies
+      rowCount = hierarchyCount*2;
+
       tHead.empty();
       this.element.addClass('cgaoAxis');
 
 
       rows = [];
       for(r = 0; r < hierarchyCount; r++) {
+        var headerRow = $(document.createElement("tr"));
+        var headerCell = $(document.createElement("th"));
+        var headerTitle = $(document.createElement('span'));
+        headerTitle.text(data.hierarchies[r].caption);
+        headerTitle.addClass('hierarchyHeader');
+
+        headerCell.appendTo(headerRow);
+        headerCell.attr('colSpan',positionCount);
+        headerCell.data('hie', data.hierarchies[r]);
+        headerRow.appendTo(tHead);
+        headerTitle.appendTo(headerCell);
+
         rows[r] = $(document.createElement("tr"));
         rows[r].appendTo(tHead);
       }
@@ -71,9 +86,9 @@ define(['jquery'], function($){
 
             if ( cellData.expanded !== undefined ) {
               if (cellData.expanded) {
-                cell.append('<div class="expanded">-</div>');
+                cell.append('<div class="expanded"><i class="expanded icon-minus"></i></div>');
               } else {
-                cell.append('<div class="collapsed">+</div>');
+                cell.append('<div class="collapsed"><i class="collapsed icon-plus"></i></div>');
               }
             }
 

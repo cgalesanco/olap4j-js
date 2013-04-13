@@ -102,7 +102,26 @@ define(['lib/angular'],function () {
           }
 
           return true;
-        }
+        };
+
+        $scope.availableForAxis = function (axisOrdinal) {
+          return function(h) {
+            var axisHierarchy;
+            if (!$scope.query || !$scope.query.axes || !$scope.query.axes[axisOrdinal] ) {
+              return true;
+            }
+
+            for (var hierarchyIdx in $scope.query.axes[axisOrdinal].hierarchies) {
+              axisHierarchy = $scope.query.axes[axisOrdinal].hierarchies[hierarchyIdx];
+              if (axisHierarchy.uniqueName === h.uniqueName) {
+                return false;
+              }
+            }
+
+            return true;
+          }
+        };
+
 
         /**
          * Appends a hierarchy to a query axis.
@@ -112,6 +131,7 @@ define(['lib/angular'],function () {
          */
         $scope.addHierarchy = function (axis, name) {
           busyServiceCall(svc.addHierarchy, axis, name, null);
+          $scope.currentMember = null;
         };
 
         /**
@@ -122,7 +142,22 @@ define(['lib/angular'],function () {
          */
         $scope.removeHierarchy = function (axis, name) {
           busyServiceCall(svc.removeHierarchy, axis, name, null)
+          $scope.currentMember = null;
         };
+
+        $scope.showContextMenu = function(event) {
+          var cellSetElem = event.currentTarget
+          var metadata = cellSetElem.olapGetMetadataAt(angular.element(event.target));
+          $scope.currentMember = metadata;
+        };
+
+        $scope.disabledClass = function(data) {
+          return !data || data.isLeaf ? 'disabled' : '';
+        }
+        $scope.removeMemberHierarchy = function(context) {
+
+        }
+
       }]);
 
 });

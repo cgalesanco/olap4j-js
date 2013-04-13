@@ -1,20 +1,26 @@
 <!doctype html>
-<html data-ng-app="olapJsApp">
+<html>
 <head>
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/axis.css"/>
   <script type="text/javascript">
     // TODO: Refactor this to use the same RequireJS config for the app and Jasmine Specs now at
     var require = {
-    paths : {
-    jquery : 'lib/jquery' // jQuery registers itself with this module id
-    }
+      paths: {
+        jquery: 'lib/jquery' // jQuery registers itself with this module id
+      },
+      shim: {
+        'lib/angular': {deps: ['jquery']},
+        'lib/jquery-ui': {deps:['jquery']}
+      }
     };
   </script>
   <script src="js/lib/require.js" data-main="js/olapJsApp"></script>
 </head>
 <body data-ng-controller="QueryCtrl">
-<div data-olap-cellset='query'></div>
+<div id="cellSet" data-ng-click="showContextMenu($event)" data-olap-cellset='query'></div>
 
+<!--
 <div class="hierarchyList">
   <div>
     <h3>Row Hierarchies</h3>
@@ -51,6 +57,19 @@
     </ul>
   </div>
 </div>
+-->
+
+<ul data-context-menu-on="currentMember" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+  <li><a data-ng-click="$parent.removeHierarchy(context.axisOrdinal,context.hierarchy.caption)">Remove <b>{{context.hierarchy.caption}}</b>
+    hierarchy</a></li>
+  <li class="dropdown-submenu"><a href='#'>Add hierarchy</a>
+    <ul class="dropdown-menu">
+      <li data-ng-repeat="hierarchy in $parent.hierarchies|filter:$parent.availableForAxis(context.axisOrdinal)">
+        <a data-ng-click="$parent.$parent.addHierarchy($parent.context.axisOrdinal,hierarchy.caption)">{{hierarchy.caption}}</a>
+      </li>
+    </ul>
+  </li>
+</ul>
 <div class="modal-background" data-ng-show="queryInProgress">
 </div>
 </body>

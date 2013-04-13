@@ -16,7 +16,7 @@ define(['jquery'], function ($) {
 
     function clickHandler(e) {
       var target = $(e.target),
-          posList = target.parent().data('pos'),
+          posList = target.parents('th').data('pos'),
           pos = [],
           prevCell;
       if (!posList) {
@@ -31,8 +31,10 @@ define(['jquery'], function ($) {
 
       if (target.hasClass('expanded')) {
         expandHandler(self, pos);
+        e.stopPropagation();
       } else if (target.hasClass('collapsed')) {
         collapseHandler(self, pos);
+        e.stopPropagation();
       }
     }
 
@@ -79,9 +81,9 @@ define(['jquery'], function ($) {
 
           if (dataCell.expanded !== undefined) {
             if (dataCell.expanded) {
-              cell.append('<div class="expanded">-</div>');
+              cell.append('<div class="expanded"><i class="expanded icon-minus"></i></div>');
             } else {
-              cell.append('<div class="collapsed">+</div>');
+              cell.append('<div class="expanded"><i class="collapsed icon-plus"></i></div>');
             }
           }
           cell.append($('<span/>').text(dataCell.member.caption));
@@ -92,6 +94,7 @@ define(['jquery'], function ($) {
 
           cell.data('pos', {
             member: dataCell.member,
+            isLeaf: dataCell.expanded === undefined,
             prevCell: (c + i) === 0 ? null : cells[(c + i) - 1]
           });
 
