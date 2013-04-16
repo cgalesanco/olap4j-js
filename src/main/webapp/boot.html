@@ -1,17 +1,177 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+  <script type="text/javascript" src="http://fast.fonts.com/jsapi/57fc7aea-bb36-4023-9a2e-764e6cb7b813.js"></script>
+  <style type="text/css">
+    body { font-family:'Garamond W01'; font-size:18pt }
+    b, strong { font-family:'Garamond W01 Bold'; font-weight:normal }
+    em, i {font-family:'Garamond W01 Italic Alt'; font-style:normal }
+    h2 { font-family:'Gill Sans W01 Bold'; font-weight:normal; font-size:2em}
+    h3 { font-family:'Gill Sans W01 Bold'; font-weight:normal; font-size:1.5em}
+    #content { width:1024px }
+    p { text-align:justify; line-height:125%; text-indent:1.5em; }
+    .code { font-family:Courier New,Courier,Monospace;font-size:0.8em}
+    .screenshot { text-align:center; }
+    img { margin:auto }
+    dl { margin-left:2em; }
+    dt { padding-top:1em }
+    dt:first-child {padding-top:0}
+    .syntaxhighlighter table td { font-size:0.7em } !important
+  </style>
+
   <title></title>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shCore.js' type='text/javascript'></script>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shBrushJScript.js' type='text/javascript'></script>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shBrushXML.js' type='text/javascript'></script>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shBrushJava.js' type='text/javascript'></script>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shBrushCss.js' type='text/javascript'></script>
+  <script src='http://alexgorbatchev.com/pub/sh/2.1.364/scripts/shLegacy.js' type='text/javascript'></script>
+  <link href='http://alexgorbatchev.com/pub/sh/2.1.364/styles/shCore.css' rel='stylesheet' type='text/css'>
+  <link href='http://alexgorbatchev.com/pub/sh/2.1.364/styles/shThemeDefault.css' rel='stylesheet' type='text/css'>
+  <script language='javascript'>
+    window.onload = function () {
+    dp.SyntaxHighlighter.HighlightAll("code");
+    //dp.SyntaxHighlighter.BloggerMode();
+    }
+  </script>
 </head>
 <body>
-<table class="table table-striped">
-  <thead>
-  <tr><th>Header</th></tr>
-  </thead>
-  <tbody>
-  <td>datum</td>
-  </tbody>
-</table>
+<div id="content">
+  <h2>Leveraging Bootstrap and Angular</h2>
+
+  <p>The driving force behind my current Javascript experiment was a need to modernize the UI for the Pivot Table.
+    Clearly
+    the old good JPivot-like UI doesn't match modern users expectations: context menus, drag & drop items, etc. So, once
+    my Javascript cellset fulfilled basic functionality (drill up/down and add/remove hierarchies) I've started my work
+    to rejuvenate the UI into a more stylish one.</p>
+
+  <p>Bootstrap looked like the obvious choice for styling, and the AngularJS team has a project providing Angular
+    directives for Bootstrap components. So, I made no further research (as I've said in a previous post, I'm pretty new
+    to this Javascript thing, and have no strong opinions on it).</p>
+
+  <h3>Table Styling: A Piece of Cake</h3>
+
+  <p style='text-indent:0'>Never underestimate a CSS style sheet, just:</p>
+  <ol>
+    <li>include Bootstrap's stylesheet</li>
+    <li>remove previous lame styling CSSs</li>
+    <li>add a handful of classes to the <span class="code">&lt;table></span> element: <span class="code">table, table-striped, table-bordered table-hover, table-condensed</span>
+    </li>
+    <li>include expand/collapse icons (courtesy of&nbsp;<a href="http://glyphicons.com/">Glyphicons</a>&nbsp;through
+      Bootstrap)
+    </li>
+  </ol>
+  <p style='text-indent:0'>and voil&aacute;, a modern looking CellSet with row hover highlight for free.</p>
+
+  <div class="screenshot">
+    <img src="http://2.bp.blogspot.com/-hd7DVbh7MLw/UWkNJGrHnHI/AAAAAAAAAGU/XGZlsm6nYfA/s800/new.png"/>
+  </div>
+  <h3>Context Menu</h3>
+  <img style="float:right;margin:1em"
+       src="http://2.bp.blogspot.com/-qpi-_f0zipo/UWkT_CuuUDI/AAAAAAAAAGk/tlXh6IvuzZQ/s700/context.png"/>
+
+  <p>Wouldn't be nice if you could just right-click on a hierarchy element to remove it from the hierachy, remove the
+    whole hierarchy, or add a new one to that axis? That's the first step to get rid of the hierarchy panel in the old
+    JSF version, and there are a couple of things to do to make that happen.</p>
+  <h4>Styling</h4>
+
+  <p>Bootstrap's toolbox saves our day again: just use its&nbsp;<a
+    href="http://twitter.github.io/bootstrap/components.html#dropdowns">dropdowns</a>&nbsp;to get something like this:
+  </p>
+  <h4>Dynamic Behaviour</h4>
+
+  <p>I'll start with the context for the menu. I modified the CellSet jQuery component to add a function&nbsp;<span
+    class="code">olapGetMetadataAt(element)&nbsp;</span>to the DOM element
+    it's binded. This function provides, for each DOM element within the table, metadata information for the <i>represented</i>&nbsp;olap
+    object. The returned object will have the following properties:</p>
+  <dl>
+    <dt class="code">axisOrdinal {number}</dt>
+    <dd> for hierarchies and hierarchy members, the ordinal for the axis
+      containing it (0 for columns, 1 for rows)
+    </dd>
+    <dt class="code">hierarchy {Object}</dt>
+    <dd>hierarchy metadata for hierarchies and hierarchy members</dd>
+    <dt class="code">member {Object}</dt>
+    <dd>member metadata for hierarchy members</dd>
+    <dt class="code">isLeaf {Boolean}</dt>
+    <dd>
+      indicates if that member is a leaf in its hierarchy
+    </dd>
+  </dl>
+  <p>With this function in place, we can add a <span class="code">ng-click</span> directive to the HTML element
+    containing the cell set, and use the event information to get the metadata for the clicked element. So we modify the
+    <span class="code">div</span> containing the cellset like this:</p>
+<pre class="brush: html" name="code">&lt;div ng-click="showContextMenu($event)" olap-cellset="query"/&gt;
+</pre>
+  <p>And then the implementation for the click handler in the Angular controller sets a scope property (<span
+    class="code">currentMember</span>) with the clicked on metadata:</p>
+<pre class="brush: javascript" name="code">$scope.showContextMenu = function(event) {
+  var cellSetElem = event.currentTarget
+  var metadata = cellSetElem.olapGetMetadataAt(
+      angular.element(event.target)
+  );
+  $scope.currentMember = metadata;
+};
+</pre>
+  <p>The HTML for the menu can now be rendered using standard <span class="code">ng-repeat</span> directives based on
+    this property:</p>
+  <pre class="brush: html" name="code">&lt;ul aria-labelledby="dropdownMenu" class="dropdown-menu" context-menu-on="currentMember" role="menu"&gt;
+  &lt;li&gt;
+    &lt;a ng-click="..."&gt;Remove &lt;b&gt;{{context.hierarchy.caption}}&lt;/b&gt; hierarchy&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="dropdown-submenu"&gt;&lt;a href="#"&gt;Add hierarchy&lt;/a&gt;
+    &lt;ul class="dropdown-menu"&gt;
+      &lt;li ng-repeat="hierarchy in $parent.hierarchies"&gt;
+      &lt;a ng-click="..." href="#"&gt;{{hierarchy.caption}}&lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+  <p><span class="code">ng-click</span> directives are used to implement menu actions delegating to controller
+    functions, the <b>Remove </b>menu option handler I've omitted in line 3 of the previous code snippet looks like
+    this:</p>
+<pre class="brush: javascript" name="code">$parent.removeHierarchy(context.axisOrdinal,context.hierarchy.caption)
+</pre>
+  <p>And, finally, the custom <span class="code">context-menu-on</span> directive shows/hides the context menu based on
+    the value of the watched context property (passed as the value for the directive attribute)</span>
+  </p>
+<pre class="brush: javascript" name="code">.directive('contextMenuOn', function () {
+    return {
+      scope: {context: '=contextMenuOn'},
+      link: function (scope, iElement, iAttrs) {
+        function hideMenu() {
+          scope.$apply(function (scope) {
+            scope.context = null
+          });
+          $('html').unbind('click', hideMenu);
+        }
+
+        scope.$watch('context', function (newValue, oldValue) {
+          if (newValue &amp;&amp; !oldValue) {
+            // The menu is closed if the menu is alreadyOpen (oldValue truthy)
+            scope.context = newValue;
+            iElement.css('position', 'absolute');
+            iElement.css('left', window.event.clientX - 5);
+            iElement.css('top', window.event.clientY - 5);
+            iElement.show();
+            $('html').click(hideMenu);
+            iElement.click(function (event) {
+              event.stopPropagation();
+            });
+            if ( window.event.stopPropagation ) {
+              window.event.stopPropagation();
+            } else {
+              window.event.cancelBubble = true;
+            }
+          } else {
+            scope.context = null;
+            iElement.hide();
+          }
+        });
+      }
+    };
+  });
+</pre>
+</div>
 </body>
 </html>
