@@ -38,11 +38,16 @@
       <url>http://repository.pentaho.org/artifactory/third-party/</url>
       <name>Pentaho Third Party Repository</name>
     </pluginRepository>
+    <pluginRepository>
+      <id>desarrollo-agil</id>
+      <url>http://demo.desarrolloagil.es/nexus/content/repositories/releases/</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <properties>
     <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
     <com.sun.jersey.version>1.17</com.sun.jersey.version>
+    <angular.version>1.0.6</angular.version>
   </properties>
 
   <dependencies>
@@ -109,6 +114,61 @@
       <version>1.1.0</version>
     </dependency>
 
+    <!--
+    = Javascript Dependencies
+    ===================================================================================== -->
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>jquery</artifactId>
+      <version>1.9.1</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>angular-js</artifactId>
+      <version>${angular.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>angular-resource</artifactId>
+      <version>${angular.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>jquery-ui</artifactId>
+      <version>1.10.3</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>bootstrap</artifactId>
+      <version>2.3.1</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>require</artifactId>
+      <version>2.1.6</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>es.cgalesanco.javascript-libraries</groupId>
+      <artifactId>angular-mocks</artifactId>
+      <version>${angular.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
+    = Test dependencies
+    ===================================================================================== -->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -139,29 +199,15 @@
      - Configured to run Javascript unit tests
      -  mvn jasmine:bdd
      -   starts a web server on port 8234 to let you run the Specs
-     - TODO: Configure to include files in webapp/js/lib, so we can separate third party javascript libraries
      - ===============================================================-->
       <plugin>
         <groupId>com.github.searls</groupId>
         <artifactId>jasmine-maven-plugin</artifactId>
-        <version>1.3.1.1-SNAPSHOT</version>
-        <!-- Removed test execution because of HtmlUnit errors
-                <executions>
-                  <execution>
-                    <goals>
-                      <goal>test</goal>
-                    </goals>
-                  </execution>
-                </executions>
-        -->
+        <version>1.3.1.3-CGA</version>
         <configuration>
           <srcDirectoryName>js</srcDirectoryName>
-          <libDirectoryName>js/lib</libDirectoryName>
           <jsSrcDir>src/main/js</jsSrcDir>
-          <jsTestSrcDir>src/test/js</jsTestSrcDir>
-          <jsLibSrcDir>src/main/webapp/js/lib</jsLibSrcDir>
           <specRunnerTemplate>REQUIRE_JS</specRunnerTemplate>
-          <browserVersion>CHROME_16</browserVersion>
           <preloadSources>
             <source>js/lib/require.js</source>
           </preloadSources>
@@ -172,7 +218,7 @@
       </plugin>
 
       <!-- WAR Plugin ==============================================
-     - Configured to copy the Javascript in'src/main/javascript'
+     - Configured to copy the Javascript in 'src/main/js'
      - into the 'js' webapp directory.
      - ==========================================================-->
       <plugin>
@@ -210,21 +256,11 @@
 
       <!-- Jetty Plugin =============================================
      - Configured to test run the web app
-     - TODO: Fix config to include javascript source directories for the jetty:run and jetty:start goals
      - ===========================================================-->
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
+        <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>8.1.8.v20121106</version>
-        <configuration>
-          <connectors>
-            <!-- work around file locking on windows -->
-            <connector implementation="org.eclipse.jetty.server.bio.SocketConnector">
-              <port>8080</port>
-              <!-- this connector defaults to 1300 for some reason -->
-            </connector>
-          </connectors>
-        </configuration>
+        <version>9.0.3.JSE</version>
         <dependencies>
           <!--
             Dependencies required to configure Jetty with the olap4j data source

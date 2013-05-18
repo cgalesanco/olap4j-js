@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
 <head>
-  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+  <link href="lib/css/bootstrap.css" rel="stylesheet">
+  <link href="lib/css/bootstrap-responsive.css" rel="stylesheet">
   <link rel="stylesheet" href="css/axis.css"/>
   <script type="text/javascript">
     // TODO: Refactor this to use the same RequireJS config for the app and Jasmine Specs now at
@@ -15,11 +16,10 @@
       }
     };
   </script>
-  <script src="js/lib/require.js" data-main="js/olapJsApp"></script>
+  <script src="/js/lib/require.js" data-main="js/olapJsApp"></script>
 </head>
 <body data-ng-controller="QueryCtrl">
 <div id="cellSet" data-ng-click="showContextMenu($event)" data-olap-cellset='query'></div>
-
 <!--
 <div class="hierarchyList">
   <div>
