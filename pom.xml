@@ -207,6 +207,7 @@
         <configuration>
           <srcDirectoryName>js</srcDirectoryName>
           <jsSrcDir>src/main/js</jsSrcDir>
+          <jsTestSrcDir>src/test/js</jsTestSrcDir>
           <specRunnerTemplate>REQUIRE_JS</specRunnerTemplate>
           <preloadSources>
             <source>js/lib/require.js</source>
@@ -261,6 +262,11 @@
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>9.0.3.JSE</version>
+        <configuration>
+          <stopKey>stop</stopKey>
+          <stopPort>8090</stopPort>
+          <webApp><defaultsDescriptor>webdefault.xml</defaultsDescriptor></webApp>
+        </configuration>
         <dependencies>
           <!--
             Dependencies required to configure Jetty with the olap4j data source

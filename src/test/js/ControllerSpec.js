@@ -13,7 +13,7 @@ define(['jquery','lib/angular-mocks','olapController'], function($){
 
     it('On construction uses the service to retrieve the hierarchies and then executes the current query',
       inject(function($rootScope,$controller){
-      $httpBackend.expectGET('/rest/query/hierarchies').respond('[{"name":"H1","caption":"Hierarchy 1"}]');
+      $httpBackend.expectGET('rest/query/hierarchies').respond('[{"name":"H1","caption":"Hierarchy 1"}]');
 
       var scope = $rootScope.$new();
       var service = {executeQuery:function(){}};

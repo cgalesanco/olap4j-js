@@ -31,31 +31,47 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
     rowsAxis.setExpandHandler(undrill);
     rowsAxis.setCollapseHandler(drill);
 
+    function drawSlips(table) {
+      var slips = $('th.cgaoSlip');
+      var i;
+      for( i = 0; i < slips.size(); i++ ) {
+        var first = slips.get(i);
+        slips.css('background','url("imgd/line_'+ first.offsetWidth+'_'+ (first.offsetHeight)+'.png") no-repeat');
+        slips.css('background-width','100%');
+        slips.css('background-height','100%');
+      }
+    }
+
     function createTitleCell() {
+      var numCols = rowsAxis.getColumnCount()-1;
       var numRows = colsAxis.getRowCount()-1;
-      if ( numRows <= 0 ) {
+      if ( colsAxis.getRowCount() <= 0 || rowsAxis.getColumnCount() <= 0) {
         return;
       }
 
-      var titleCell = $(document.createElement('th'));
-      if (colsAxis.getRowCount() > 1) {
-        titleCell.attr('rowSpan', numRows);
+      if ( numRows > 0 && numCols > 0 ) {
+        var titleCell = $(document.createElement('th'));
+        if (numRows > 1) {
+          titleCell.attr('rowSpan', numRows);
+        }
+        if (numCols > 1) {
+          titleCell.attr('colSpan', numCols);
+        }
+        titleCell.text('\u00A0');
+        titleCell.insertBefore(tHead.find('tr:first th:first'));
       }
-      if (rowsAxis.getColumnCount() > 1) {
-        titleCell.attr('colSpan', rowsAxis.getColumnCount());
-      }
-      titleCell.text('\u00A0');
-      titleCell.insertBefore(tHead.find('tr:first th:first'));
 
       for(var i = 0; i < cellSet.axes[1].hierarchies.length; ++i) {
         titleCell = $(document.createElement('th'));
         titleCell.data('hie', cellSet.axes[1].hierarchies[i]);
+        titleCell.addClass('rowHierarchy');
         var titleSpan = $(document.createElement('span'));
         titleSpan.addClass('hierarchyHeader');
         titleSpan.text(cellSet.axes[1].hierarchies[i].caption);
         titleSpan.appendTo(titleCell);
-        titleCell.insertBefore(tHead.find('tr:eq('+numRows+') th:eq('+i+')'));
+        titleCell.insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+i+')'));
       }
+      $('<th class="cgaoSlip">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
     }
 
     this.setData = function (data) {
@@ -66,7 +82,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       createTitleCell();
 
       var headers = table.find('.hierarchyHeader');
-      headers.draggable({revert: 'invalid'});
+      headers.draggable({helper:'clone', revertDuration:0, revert:true});
       headers.droppable({
         accept:'.hierarchyHeader',
         drop:function(event,ui){
@@ -74,7 +90,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
           var metadataTo = parent[0].olapGetMetadataAt(angular.element(this));
           if ( metadataFrom ) {
 
-            alert(metadataFrom.hierarchy.caption + '->' + metadataTo.hierarchy.caption);
+            alert(metadataFrom.hierarchy.caption + '->' + metadataTo.hierarchy.caption+' ('+metadataTo.axisOrdinal+')');
           }
         }
       });
@@ -90,6 +106,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
           cell.appendTo(row);
         }
       }
+      drawSlips(table);
     };
 
     this.setDrillHandlers = function(drill, undrill) {
@@ -134,6 +151,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
         }
         metadata.hierarchy = cellSet.axes[axisOrdinal].hierarchies[hierarchyIdx];
       } else if ( (data = element.data('hie')) ) {
+
         metadata = {
           hierarchy : data
         };
@@ -142,8 +160,10 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       return metadata;
     }
 
-    table.appendTo(parent);
     table.addClass('cgaoTable table table-striped table-bordered table-hover table-condensed');
+    table.appendTo(parent).ready(function(){
+      drawSlips(table)
+    });
   }
 
   return CellSetTable;

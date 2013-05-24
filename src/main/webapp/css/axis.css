@@ -32,6 +32,20 @@ body {
     text-align:right;
 }
 
+table th.cgaoSlip {
+  width:2em;
+  padding:0px;
+  border:none;
+}
+
+table th.cgaoSlip + th {
+    border-left:none;
+}
+
+th.colHierarchy {
+  text-align:right;
+}
+
 /**
 * Hierarchy List panel
 ****************************************/

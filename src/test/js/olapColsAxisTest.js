@@ -49,12 +49,12 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
       axis.setData({hierarchies:axisHierarchies, positions:axisPositions});
     });
 
-    it('creates a row for each hierarchy', function () {
+    it('creates a row for each hierarchy plus on additional row for the "stacked" hierarchy header', function () {
 
       expect(elem.prop('tagName')).toBe('THEAD');
 
       // Last row will contain a cell for each position
-      expect(elem.children('tr').size()).toBe(axisPositions[0].length);
+      expect(elem.children('tr').size()).toBe(axisPositions[0].length+1);
     });
 
     it('creates a column for each position', function () {
@@ -62,7 +62,7 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
       expect(elem.prop('tagName'));
 
       // Last row will contain a cell for each position
-      expect(elem.find('tr:eq(1) > th').size()).toBe(axisPositions.length);
+      expect(elem.find('tr:last > th').size()).toBe(axisPositions.length);
     });
 
     it('has a method to retrieve the number of rows', function(){
@@ -70,16 +70,16 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
     });
 
     it('creates a header cell for each member in a position', function () {
-      var firstRowCells = elem.find('tr:eq(0) th');
-      var secondRowCells = elem.find('tr:eq(1) th');
+      var hierarchyHeaderCells = elem.find('th.colHierarchy');
 
-      expect(firstRowCells.size()).toBe(3);
-      expect(secondRowCells.size()).toBe(5);
+      expect(hierarchyHeaderCells.size()).toBe(2);
     });
 
     it('uses member caption for header cell contents (properly encoding it)', function () {
-      var firstCell = elem.find('tr:eq(0) th:eq(0) :last');
-      var secondCell = elem.find('tr:eq(1) th:eq(2) :last');
+      // First cell will be in row 1 (because of hierarchy label displacement),
+      // column 2 (after the two cells used for each hierarchy label
+      var firstCell = elem.find('tr:eq(1) th:eq(2) :last');
+      var secondCell = elem.find('tr:eq(2) th:eq(2) :last');
 
       expect(firstCell.text()).toBe(axisPositions[0][0].member.caption);
 
@@ -87,18 +87,18 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
       expect(secondCell.text()).toBe(specialCharCaption);
     });
 
-    it('uses member span property to set cell column span', function () {
-      var firstCell = elem.find('tr:eq(0) th:eq(0)');
-      var secondCell = elem.find('tr:eq(0) th:eq(1)');
+    it('creates a second cell for each hierarchy label to add the "slip"', function () {
+      var firstCell = elem.find('tr:eq(0) th:eq(1)');
+      var secondCell = elem.find('tr:eq(1) th:eq(1)');
 
-      expect(firstCell.attr('colSpan')).toBe('3');
-      expect(secondCell.attr('colSpan')).toBeUndefined();
+      expect(firstCell.hasClass('cgaoSlip')).toBeTruthy();
+      expect(secondCell.hasClass('cgaoSlip')).toBeTruthy();
     });
 
     it('uses member expanded property to display the expanded/collapsed control', function () {
-      var firstCell = elem.find('tr:eq(1) th:eq(0)');
-      var secondCell = elem.find('tr:eq(0) th:eq(1)');
-      var thirdCell = elem.find('tr:eq(1) th:eq(1)');
+      var firstCell = elem.find('tr:eq(2) th:eq(0)');
+      var secondCell = elem.find('tr:eq(1) th:eq(3)');
+      var thirdCell = elem.find('tr:eq(2) th:eq(1)');
 
       expect(firstCell.children('.expanded').length).toBe(1);
       expect(secondCell.children('.collapsed').size()).toBe(1);
@@ -107,8 +107,8 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
     });
 
     it('properly call expand/collapse event handlers', function () {
-      var firstButton = elem.find('tr:eq(1) th:eq(0) .expanded');
-      var secondButton = elem.find('tr:eq(0) th:eq(1) .collapsed');
+      var firstButton = elem.find('tr:eq(2) th:eq(0) .expanded');
+      var secondButton = elem.find('tr:eq(1) th:eq(3) .collapsed');
       var expandSpy = jasmine.createSpy();
       var collapseSpy = jasmine.createSpy();
       axis.setExpandHandler(expandSpy);

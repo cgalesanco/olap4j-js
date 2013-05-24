@@ -78,12 +78,15 @@ define(['jquery'], function ($) {
           dataCell = dataRow[i];
           cell = $('<th>');
           cells[c + i] = cell;
+          if ( i == dataRow.length-1 ) {
+            cell.attr('colSpan','2');
+          }
 
           if (dataCell.expanded !== undefined) {
             if (dataCell.expanded) {
               cell.append('<div class="expanded"><i class="expanded icon-minus"></i></div>');
             } else {
-              cell.append('<div class="expanded"><i class="collapsed icon-plus"></i></div>');
+              cell.append('<div class="collapsed"><i class="collapsed icon-plus"></i></div>');
             }
           }
           cell.append($('<span/>').text(dataCell.member.caption));

@@ -34,6 +34,23 @@ define(['jquery'], function($){
 
     this.element.click(clickHandler);
 
+    /**
+     * Sets the axis data, generating the rows for the columns axis.
+     * Hierarchy labels are displaced one row up of their respective members, so the first row will contain only
+     * the label for the first hierarchy and the last row will contain only the members in the last hierarchy.
+     //   +-------------+-+
+     //   | Hierarchy 1 | |
+     //   +-------------+-+-----------+-----------+
+     //   | Hierarchy 2 | | H1 member | H1 member |
+     //   +-------------+-+-----------+-----------+
+     //   | Hierarchy 3 | | H2 member | H2 member |
+     //   +-------------+-+-----------+-----------+
+     //   | H3 Member   | H3 member |
+     //   +-------------+-----------+
+     * Hierarchy labels use two cells, the second cell displays a graphical "slip" to make the
+     * header displacement evident
+     * @param data
+     */
     this.setData = function(data) {
       var tHead = this.element, rows, c, r, cell, span,
           hierarchyCount, positionCount;
@@ -46,12 +63,16 @@ define(['jquery'], function($){
         positionCount = data.positions.length;
       }
 
-      rowCount = hierarchyCount*2;
+      rowCount = hierarchyCount+1;
 
       tHead.empty();
       this.element.addClass('cgaoAxis');
 
 
+      // Creates a row for each hierarchy in the axis.
+      //  The first column will contain the hierarchy labels
+      //  Following columns will contain hierarchy members (on row down)
+      //  the rows variable will be populated with the rows to be populated with hierarchy members
       rows = [];
       for(r = 0; r < hierarchyCount; r++) {
         var headerRow = $(document.createElement("tr"));
@@ -60,16 +81,25 @@ define(['jquery'], function($){
         headerTitle.text(data.hierarchies[r].caption);
         headerTitle.addClass('hierarchyHeader');
 
+        headerCell.addClass('colHierarchy')
         headerCell.appendTo(headerRow);
-        headerCell.attr('colSpan',positionCount);
         headerCell.data('hie', data.hierarchies[r]);
+        $('<th class="cgaoSlip">&nbsp;</th>').appendTo(headerRow);
         headerRow.appendTo(tHead);
         headerTitle.appendTo(headerCell);
 
-        rows[r] = $(document.createElement("tr"));
-        rows[r].appendTo(tHead);
+        if ( r > 0 ) {
+          rows[r-1] = headerRow;
+        }
+      }
+      if ( hierarchyCount > 0 ) {
+        // Create an empty last row
+        var r = rows[hierarchyCount-1] = $(document.createElement("tr"));
+        r.appendTo(tHead);
       }
 
+
+      // Populates the member rows
       for(c = 0; c < positionCount; c++) {
         var pos = data.positions[c];
         var firstRow = hierarchyCount - pos.length;

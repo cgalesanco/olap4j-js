@@ -66,7 +66,7 @@ define(['jquery', 'olapRowsAxis'], function ($, CellSetRowsAxis) {
     });
 
     it('uses member caption for header cell contents (properly encoding it)', function () {
-      var firstCell = tBody.find('tr:first th:first :eq(1) ');
+      var firstCell = tBody.find('tr:first th:first span');
       var secondCell = tBody.find('tr:eq(2) th:eq(0)');
 
       expect(firstCell.text()).toBe(axisPositions[0][0].member.caption);

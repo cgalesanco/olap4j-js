@@ -28,8 +28,7 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
     });
 
     describe('draws the pivot table on setData', function(){
-      var rowsColumnCount = 3;
-      var colsRowCount = 1;
+      var colsRowCount, rowsColumnCount;
 
       beforeEach(function(){
         mockColsAxis.setData.andCallFake(function(){
@@ -38,11 +37,14 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
               '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>' +
               '<tr><th>Mock Axis</th><th>Mock Axis</th></tr>');
         });
+        colsRowCount = 4;
+
         mockRowsAxis.setData.andCallFake(function(){
           rowsAxisSpy.mostRecentCall.args[0].html('' +
-              '<tr><th>Mock Row Axis</th></tr>' +
-              '<tr><th>Mock Row Axis</th></tr>');
+              '<tr><th>Mock Row Axis</th><th>Mock Row Axis</th></tr>' +
+              '<tr><th>Mock Row Axis</th><th>Mock Row Axis</th></tr>');
         });
+        rowsColumnCount = 2;
 
         mockColsAxis.getRowCount.andReturn(colsRowCount);
         mockRowsAxis.getColumnCount.andReturn(rowsColumnCount);
@@ -50,18 +52,18 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
 
       it("creates a title cell in the upper left corner", function(){
         var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
-        csTable.setData({axes:[[],[]], data:[]});
+        csTable.setData({axes:[{hierarchies:[]},{hierarchies:[]}], data:[]});
 
         var titleCell = parent.find('table > thead > tr:first > th:first');
         expect(titleCell.text()).toBe('\u00a0');
-        expect(titleCell.attr('rowSpan')).toBeUndefined();
-        expect(titleCell.attr('colSpan')).toBe(''+rowsColumnCount);
+        expect(titleCell.attr('colSpan')).toBeUndefined();
+        expect(titleCell.attr('rowSpan')).toBe(''+(colsRowCount-1));
       });
 
       it("calls 'setData' on rows and columns axis ", function(){
         var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
-        var rowAxisData = {};
-        var colAxisData = {};
+        var rowAxisData = {hierarchies:[]};
+        var colAxisData = {hierarchies:[]};
 
         csTable.setData({axes:[rowAxisData, colAxisData], data:[]});
 
@@ -74,7 +76,7 @@ define(['jquery', 'olapCellSetTable'], function ($, CellSetTable) {
 
         var csTable = new CellSetTable(parent, rowsAxisSpy, colsAxisSpy);
         var expectedData = [[1,2],[3,4]];
-        csTable.setData({axes:[[[]],[]], data:expectedData});
+        csTable.setData({axes:[{hierarchies:[]},{hierarchies:[]}], data:expectedData});
 
         for(r = 0; r < expectedData.length; r++) {
           rowData = expectedData[r];
