@@ -120,6 +120,31 @@ public class QueryController
     }
   }
 
+  @POST
+  @Path("hierarchies/move")
+  @Produces(MediaType.APPLICATION_JSON)
+  public QueryCellSet moveHierarchy(@FormParam("hierarchy") String hierarchyName,
+                                    @FormParam("axis") int targetAxisOrdinal, @FormParam("position") int targetPos) {
+    QueryHierarchy hierarchy = _query.getHierarchy(hierarchyName);
+    QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(targetAxisOrdinal));
+    int hierarchySrcPos = axis.getHierarchies().indexOf(hierarchy);
+    if ( hierarchySrcPos < 0 ) {
+      axis.addHierarchy(hierarchy);
+      hierarchySrcPos = axis.getHierarchies().size()-1;
+    }
+    if ( targetPos > hierarchySrcPos) {
+      for(; targetPos > hierarchySrcPos; ++hierarchySrcPos ) {
+        axis.pushDown(hierarchySrcPos);
+      }
+    } else if ( targetPos < hierarchySrcPos ) {
+      for (; targetPos < hierarchySrcPos; --hierarchySrcPos) {
+        axis.pullUp(hierarchySrcPos);
+      }
+    }
+
+    return doExecuteQuery();
+  }
+
   /**
    * Removes a hierarchy form an axis.
    * @param axisOrdinal The axis where the hierarchy is to be removed.

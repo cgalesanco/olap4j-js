@@ -46,6 +46,19 @@ th.colHierarchy {
   text-align:right;
 }
 
+th.rowHierarchy.cgaoDropLeft {
+    border-left:3px solid #0088cc;
+}
+th.rowHierarchy.cgaoDropRight {
+    border-right:3px solid #0088cc;
+}
+th.colHierarchy.cgaoDropTop {
+    border-top:3px solid #0088cc;
+}
+th.colHierarchy.cgaoDropBottom {
+    border-bottom:3px solid #0088cc;
+}
+
 /**
 * Hierarchy List panel
 ****************************************/

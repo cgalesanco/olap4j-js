@@ -71,6 +71,21 @@ define(['jquery'],function($){
       drillUndrill('undrill', axisOrdinal, position, options);
     };
 
+    this.move = function(hierarchyName, axisOrdinal, position, options) {
+      $.ajax({
+        type:'post',
+        url:svcUrl+'/hierarchies/move',
+        data: {
+          hierarchy:hierarchyName,
+          axis:axisOrdinal,
+          position:position
+        },
+        success:function(data){
+          postProcessData(data,options);
+        }
+      });
+    };
+
     this.addHierarchy = function(axisOrdinal, hierarchyId, options) {
       $.ajax({
         type:'post',

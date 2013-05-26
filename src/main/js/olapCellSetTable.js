@@ -1,5 +1,8 @@
 /*global define */
 define(['jquery', 'lib/jquery-ui'], function ($) {
+  var dropHighlightH = ['cgaoDropLeft','cgaoDropRight'];
+  var dropHighlightV= ['cgaoDropTop','cgaoDropBottom'];
+
   function CellSetTable(parent, CellSetRowsAxis, CellSetColsAxis) {
     var self = this,
         cellSet,
@@ -7,7 +10,8 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
         tHead = $(document.createElement('thead')),
         tBody = $(document.createElement('tbody')),
         rowsAxis, colsAxis,
-        drillHandler, undrillHandler;
+        drillHandler, undrillHandler,
+        moveHandler;
 
     function drill(axis, position) {
       if ( drillHandler ) {
@@ -18,6 +22,12 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
     function undrill(axis, position) {
       if ( undrillHandler ) {
         undrillHandler(self, axis === colsAxis ? 0 : 1, position);
+      }
+    }
+
+    function move(hierarchy, axis, position) {
+      if ( moveHandler ) {
+        moveHandler(self, hierarchy, axis, position)
       }
     }
 
@@ -74,6 +84,42 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       $('<th class="cgaoSlip">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
     }
 
+    function within(elem, x, y) {
+      var left = elem.offset().left;
+      var top = elem.offset().top;
+      var width = elem.width();
+      var height = elem.height();
+      var result = null;
+      if ( x >= left && (x-left <= width) &&
+          y >= top && (y-top) <= height ) {
+        var result = [];
+        result.push(((x-left) < width/2) ? 0 : 1);
+        result.push(((y-top) < height/2) ? 0 : 1);
+      }
+      return result;
+    }
+
+    function onHierarchyDrag(event, ui){
+      var over = ui.helper.data('over');
+      if ( over ) {
+        var pos = within(over,event.pageX, event.pageY);
+        if ( !pos ) {
+          over.removeClass(dropHighlightH.join(' ')+dropHighlightV.join(' '));
+        } else {
+          over.addClass(dropHighlightH[pos[0]]+' '+dropHighlightV[pos[1]]);
+          over.removeClass(dropHighlightH[(pos[0]+1)%2]+' '+dropHighlightV[(pos[1]+1)%2]);
+        }
+      }
+    }
+
+    function onHierarchyDragOver(event,ui){
+      ui.helper.data('over', $(event.target));
+    }
+
+    function onHierarchyDragOut(event) {
+      $(event.target).removeClass(dropHighlightH.concat(dropHighlightV).join(' '));
+    }
+
     this.setData = function (data) {
       cellSet = data;
       colsAxis.setData(data.axes[0]);
@@ -81,16 +127,35 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
 
       createTitleCell();
 
-      var headers = table.find('.hierarchyHeader');
-      headers.draggable({helper:'clone', revertDuration:0, revert:true});
+      var headers = table.find('.rowHierarchy,.colHierarchy');
+      headers.draggable({
+        helper:'clone',
+        revertDuration:0,
+        revert:true,
+        cursor:'pointer',
+        drag:onHierarchyDrag
+      });
       headers.droppable({
-        accept:'.hierarchyHeader',
+        accept:'.rowHierarchy,.colHierarchy',
+        tolerance:'pointer',
+        over:onHierarchyDragOver,
+        out:onHierarchyDragOut,
         drop:function(event,ui){
+          $(event.target).removeClass(dropHighlightH.concat(dropHighlightV).join(' '));
           var metadataFrom = parent[0].olapGetMetadataAt(ui.draggable);
-          var metadataTo = parent[0].olapGetMetadataAt(angular.element(this));
-          if ( metadataFrom ) {
+          var dest = angular.element(this);
+          var metadataTo = parent[0].olapGetMetadataAt(dest);
 
-            alert(metadataFrom.hierarchy.caption + '->' + metadataTo.hierarchy.caption+' ('+metadataTo.axisOrdinal+')');
+          var pos = 0;
+          if ( metadataFrom ) {
+            if ( metadataTo.axisOrdinal === 0 ) {
+              pos = dest.closest('tr').prevAll().length;
+              pos += within(dest, event.pageX, event.pageY)[1];
+            } else if ( metadataTo.axisOrdinal === 1 ) {
+              pos += dest.get(0).cellIndex;
+              pos += within(dest, event.pageX, event.pageY)[0];
+            }
+            move(metadataFrom.hierarchy.caption, metadataTo.axisOrdinal, pos);
           }
         }
       });
@@ -114,6 +179,10 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       undrillHandler = undrill;
     };
 
+    this.setMoveHandler = function(move) {
+      moveHandler = move;
+    }
+
     parent[0].olapGetMetadataAt = function(element) {
       if ( !cellSet ) {
         return null; // No cellSet bind
@@ -127,10 +196,10 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       }
 
       var axisOrdinal;
-      if ( element.parents('tBody').size() ) {
-        axisOrdinal = 1;
-      } else if ( element.parents('tHead').size() ) {
+      if ( element.hasClass('colHierarchy') ) {
         axisOrdinal = 0;
+      } else if ( element.hasClass('rowHierarchy') ) {
+        axisOrdinal = 1;
       } else {
         return null;
       }
@@ -153,7 +222,8 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       } else if ( (data = element.data('hie')) ) {
 
         metadata = {
-          hierarchy : data
+          hierarchy : data,
+          axisOrdinal:axisOrdinal
         };
       }
 

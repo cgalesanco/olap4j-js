@@ -19,6 +19,11 @@ define(['lib/angular'],function () {
               busyServiceCall(svc.undrill, axis, position, null);
             })
           };
+          scope.query.move = function(hierarchy, axisOrdinal, position) {
+            $scope.$apply(function(){
+              busyServiceCall(svc.move, hierarchy, axisOrdinal, position, null);
+            })
+          }
         }
 
         /**

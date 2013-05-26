@@ -49,6 +49,10 @@ require(['jquery', 'lib/angular',
               });
 
               table.setDrillHandlers(createHandler('drill'), createHandler('undrill'));
+              table.setMoveHandler(function(table,hierarchy,axis,position) {
+                var query = scope.$eval(iAttrs.olapCellset);
+                query.move(hierarchy,axis,position);
+              });
             }
 
             return {
