@@ -41,14 +41,14 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
     rowsAxis.setExpandHandler(undrill);
     rowsAxis.setCollapseHandler(drill);
 
-    function drawSlips(table) {
-      var slips = $('th.cgaoSlip');
+    function drawSlides(table) {
+      var slides = $('th.cgaoSlide');
       var i;
-      for( i = 0; i < slips.size(); i++ ) {
-        var first = slips.get(i);
-        slips.css('background','url("imgd/line_'+ first.offsetWidth+'_'+ (first.offsetHeight)+'.png") no-repeat');
-        slips.css('background-width','100%');
-        slips.css('background-height','100%');
+      for( i = 0; i < slides.size(); i++ ) {
+        var first = slides.get(i);
+        slides.css('background','url("imgd/line_'+ first.offsetWidth+'_'+ (first.offsetHeight)+'.png") no-repeat');
+        slides.css('background-width','100%');
+        slides.css('background-height','100%');
       }
     }
 
@@ -81,7 +81,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
         titleSpan.appendTo(titleCell);
         titleCell.insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+i+')'));
       }
-      $('<th class="cgaoSlip">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
+      $('<th class="cgaoSlide">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
     }
 
     function within(elem, x, y) {
@@ -171,7 +171,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
           cell.appendTo(row);
         }
       }
-      drawSlips(table);
+      drawSlides(table);
     };
 
     this.setDrillHandlers = function(drill, undrill) {
@@ -232,7 +232,7 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
 
     table.addClass('cgaoTable table table-striped table-bordered table-hover table-condensed');
     table.appendTo(parent).ready(function(){
-      drawSlips(table)
+      drawSlides(table)
     });
   }
 

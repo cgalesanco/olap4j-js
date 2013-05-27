@@ -87,12 +87,12 @@ define(['jquery', 'olapColsAxis'], function ($, CellSetColsAxis) {
       expect(secondCell.text()).toBe(specialCharCaption);
     });
 
-    it('creates a second cell for each hierarchy label to add the "slip"', function () {
+    it('creates a second cell for each hierarchy label to add the "slide"', function () {
       var firstCell = elem.find('tr:eq(0) th:eq(1)');
       var secondCell = elem.find('tr:eq(1) th:eq(1)');
 
-      expect(firstCell.hasClass('cgaoSlip')).toBeTruthy();
-      expect(secondCell.hasClass('cgaoSlip')).toBeTruthy();
+      expect(firstCell.hasClass('cgaoSlide')).toBeTruthy();
+      expect(secondCell.hasClass('cgaoSlide')).toBeTruthy();
     });
 
     it('uses member expanded property to display the expanded/collapsed control', function () {

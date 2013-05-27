@@ -32,13 +32,13 @@ body {
     text-align:right;
 }
 
-table th.cgaoSlip {
+table th.cgaoSlide {
   width:2em;
   padding:0px;
   border:none;
 }
 
-table th.cgaoSlip + th {
+table th.cgaoSlide + th {
     border-left:none;
 }
 

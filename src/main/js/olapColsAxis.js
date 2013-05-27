@@ -47,7 +47,7 @@ define(['jquery'], function($){
      //   +-------------+-+-----------+-----------+
      //   | H3 Member   | H3 member |
      //   +-------------+-----------+
-     * Hierarchy labels use two cells, the second cell displays a graphical "slip" to make the
+     * Hierarchy labels use two cells, the second cell displays a graphical "slide" to make the
      * header displacement evident
      * @param data
      */
@@ -84,7 +84,7 @@ define(['jquery'], function($){
         headerCell.addClass('colHierarchy')
         headerCell.appendTo(headerRow);
         headerCell.data('hie', data.hierarchies[r]);
-        $('<th class="cgaoSlip">&nbsp;</th>').appendTo(headerRow);
+        $('<th class="cgaoSlide">&nbsp;</th>').appendTo(headerRow);
         headerRow.appendTo(tHead);
         headerTitle.appendTo(headerCell);
 
