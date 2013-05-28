@@ -129,7 +129,12 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
 
       var headers = table.find('.rowHierarchy,.colHierarchy');
       headers.draggable({
-        helper:'clone',
+        helper:function(e,ui){
+          var src = $(e.currentTarget);
+          return src.clone()
+              .css('border','1px solid #dddddd')
+              .css('background','rgba(255,255,255,0.5)')
+        },
         revertDuration:0,
         revert:true,
         cursor:'pointer',
