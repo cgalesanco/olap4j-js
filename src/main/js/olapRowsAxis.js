@@ -52,6 +52,9 @@ define(['jquery'], function ($) {
       if ( !data || !data.hierarchies ) {
         hierarchyCount = 0;
         positionCount = 0;
+        tBody.empty();
+        columnCount = 1;
+        return;
       } else {
         hierarchyCount = data.hierarchies.length;
         positionCount = data.positions.length;

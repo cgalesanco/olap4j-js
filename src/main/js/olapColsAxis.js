@@ -58,6 +58,11 @@ define(['jquery'], function($){
       if ( !data || !data.hierarchies ) {
         hierarchyCount = 0;
         positionCount = 0;
+        tHead.empty();
+        tHead.addClass('cgaoAxis');
+        $('<tr><th class="colHierarchy"><span>(Empty Axis)</span></th><th class="cgaoSlide">&nbsp;</th></tr><tr></tr>').appendTo(tHead);
+        rowCount = 2;
+        return;
       } else {
         hierarchyCount = data.hierarchies.length;
         positionCount = data.positions.length;
@@ -68,6 +73,9 @@ define(['jquery'], function($){
       tHead.empty();
       this.element.addClass('cgaoAxis');
 
+      if ( !hierarchyCount ) {
+        rowCount = 1;
+      }
 
       // Creates a row for each hierarchy in the axis.
       //  The first column will contain the hierarchy labels

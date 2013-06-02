@@ -71,17 +71,26 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
         titleCell.insertBefore(tHead.find('tr:first th:first'));
       }
 
-      for(var i = 0; i < cellSet.axes[1].hierarchies.length; ++i) {
-        titleCell = $(document.createElement('th'));
-        titleCell.data('hie', cellSet.axes[1].hierarchies[i]);
-        titleCell.addClass('rowHierarchy');
-        var titleSpan = $(document.createElement('span'));
-        titleSpan.addClass('hierarchyHeader');
-        titleSpan.text(cellSet.axes[1].hierarchies[i].caption);
-        titleSpan.appendTo(titleCell);
-        titleCell.insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+i+')'));
+      if ( cellSet.axes.length > 1 && cellSet.axes[1].hierarchies && cellSet.axes[1].hierarchies.length) {
+        for(var i = 0; i < cellSet.axes[1].hierarchies.length; ++i) {
+          titleCell = $(document.createElement('th'));
+          titleCell.data('hie', cellSet.axes[1].hierarchies[i]);
+          titleCell.addClass('rowHierarchy');
+          var titleSpan = $(document.createElement('span'));
+          titleSpan.addClass('hierarchyHeader');
+          titleSpan.text(cellSet.axes[1].hierarchies[i].caption);
+          titleSpan.appendTo(titleCell);
+          titleCell.insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+i+')'));
+        }
+        $('<th class="cgaoSlide">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
+      } else {
+        var v = tHead.find('tr:eq('+(numRows)+') th:eq(0)');
+        if ( !v.size() ) {
+          $('<tr><th class="rowHierarchy" colSpan="2">(Empty axis)</th></tr>').appendTo(tHead);
+        } else {
+          $('<th class="rowHierarchy" colSpan="2">(Empty axis)</th>').insertBefore(v);
+        }
       }
-      $('<th class="cgaoSlide">&nbsp;</th>').insertBefore(tHead.find('tr:eq('+(numRows)+') th:eq('+cellSet.axes[1].hierarchies.length+')'));
     }
 
     function within(elem, x, y) {
@@ -166,14 +175,16 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
       });
 
 
-      var r, c;
-      for (r = 0; r < data.data.length; ++r) {
-        var dataRow = data.data[r];
-        var row = tBody.children('tr:eq(' + r + ')');
-        for (c = 0; c < dataRow.length; c++) {
-          var cell = $(document.createElement('td'));
-          cell.text(dataRow[c]);
-          cell.appendTo(row);
+      if ( data.data ) {
+        var r, c;
+        for (r = 0; r < data.data.length; ++r) {
+          var dataRow = data.data[r];
+          var row = tBody.children('tr:eq(' + r + ')');
+          for (c = 0; c < dataRow.length; c++) {
+            var cell = $(document.createElement('td'));
+            cell.text(dataRow[c]);
+            cell.appendTo(row);
+          }
         }
       }
       drawSlides(table);
@@ -228,6 +239,10 @@ define(['jquery', 'lib/jquery-ui'], function ($) {
 
         metadata = {
           hierarchy : data,
+          axisOrdinal:axisOrdinal
+        };
+      } else if ( axisOrdinal !== null ) {
+        metadata = {
           axisOrdinal:axisOrdinal
         };
       }
