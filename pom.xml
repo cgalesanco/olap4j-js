@@ -3,14 +3,14 @@
   <groupId>es.cgalesanco</groupId>
   <artifactId>olap4j-js</artifactId>
   <packaging>war</packaging>
-  <version>0.0.1</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>Olap4j Javascript front end</name>
 
   <scm>
     <connection>scm:git:git@github.com:cgalesanco/olap4j-js.git</connection>
     <url>scm:git:git@github.com:cgalesanco/olap4j-js.git</url>
     <developerConnection>scm:git:git@github.com:cgalesanco/olap4j-js.git</developerConnection>
-    <tag>olap4j-js-0.0.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <repositories>
     <repository>
