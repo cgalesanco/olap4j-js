@@ -8,7 +8,9 @@
   <name>Olap4j Javascript front end</name>
 
   <scm>
-    <developerConnection>scm:git:https://github.com/cgalesanco/olap4j-js.git</developerConnection>
+    <connection>scm:git:git@github.com:cgalesanco/olap4j-js.git</connection>
+    <url>scm:git:git@github.com:cgalesanco/olap4j-js.git</url>
+    <developerConnection>scm:git:git@github.com:cgalesanco/olap4j-js.git</developerConnection>
   </scm>
   <repositories>
     <repository>
@@ -194,10 +196,9 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.7</version>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.1</version>
       </plugin>
-
 
       <!-- Jasmine Plugin ===============================================
      - Configured to run Javascript unit tests
