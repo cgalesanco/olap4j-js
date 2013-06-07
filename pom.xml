@@ -12,6 +12,17 @@
     <url>scm:git:git@github.com:cgalesanco/olap4j-js.git</url>
     <developerConnection>scm:git:git@github.com:cgalesanco/olap4j-js.git</developerConnection>
   </scm>
+  <distributionManagement>
+    <repository>
+      <id>desarrollo-agil</id>
+      <url>http://demo.desarrolloagil.es/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>desarrollo-agil-snapshots</id>
+      <url>http://demo.desarrolloagil.es/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <repositories>
     <repository>
       <id>pentaho</id>
