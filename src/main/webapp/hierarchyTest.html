@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script src="js/lib/angular.js"></script>
+  <script type="text/javascript">
+    function TreeCtrl($scope, $http) {
+      $http.get('rest/metadata/hierarchy/Product/roots')
+        .success(function(data){
+          $scope.data = data;
+        });
+
+      function getChildren(node) {
+        var result = [];
+        $http.get('rest/metadata/member/'+encodeURIComponent(node.uniqueName)+'/children')
+          .success(function(data){
+            result.push.apply(result,data);
+          });
+        return result;
+      }
+
+      $scope.toggleExpand = function(node){
+        if ( node.leaf ) {
+          return;
+        }
+
+        if ( node.expanded ) {
+          node.expanded = false
+        } else {
+          if ( !node.children ) {
+            node.children = getChildren(node);
+          }
+          node.expanded = true;
+        }
+      }
+    }
+
+  </script>
+</head>
+<body data-ng-app>
+  <script type="text/ng-template" id="treeNode">
+    <button type="button" data-ng-hide="node.leaf" data-ng-click="toggleExpand(node)">
+      <span data-ng-hide="node.expanded">+</span><span data-ng-show="node.expanded">-</span></button>{{node.name}}
+    <ul data-ng-hide="node.leaf || node.expanded==false"><li data-ng-repeat="node in node.children" data-ng-include="'treeNode'"></li></ul>
+  </script>
+  <ul data-ng-controller="TreeCtrl"><li data-ng-repeat="node in data" data-ng-include="'treeNode'"></li></ul>
+</body>
+</html>
