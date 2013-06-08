@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.ws.WebServiceException;
 
 import com.cgalesanco.olap4j.json.QueryCellSet;
-import com.sun.jersey.spi.container.servlet.PerSession;
 import es.cgalesanco.olap4j.query.Query;
 import es.cgalesanco.olap4j.query.QueryAxis;
 import es.cgalesanco.olap4j.query.QueryHierarchy;
@@ -28,7 +27,6 @@ import org.olap4j.metadata.Member;
 /**
  * JAX-RS resource providing access to an olap4j query stored in the user's session.
  */
-@PerSession
 @Path("/query")
 public class QueryController
 {
