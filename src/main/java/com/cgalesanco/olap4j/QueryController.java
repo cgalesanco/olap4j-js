@@ -1,14 +1,9 @@
 package com.cgalesanco.olap4j;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -24,13 +19,11 @@ import es.cgalesanco.olap4j.query.QueryAxis;
 import es.cgalesanco.olap4j.query.QueryHierarchy;
 import es.cgalesanco.olap4j.query.Selection;
 import org.olap4j.Axis;
-import org.olap4j.OlapConnection;
 import org.olap4j.OlapException;
 import org.olap4j.mdx.IdentifierNode;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Member;
-import org.olap4j.metadata.NamedList;
 
 /**
  * JAX-RS resource providing access to an olap4j query stored in the user's session.
@@ -50,6 +43,7 @@ public class QueryController
 
   /**
    * Executes the query.
+   *
    * @return the CellSet result.
    */
   @GET
@@ -60,8 +54,9 @@ public class QueryController
 
   /**
    * Drills a position.
+   *
    * @param axisOrdinal the axis ordinal for the drilled position
-   * @param memberIds the list of members for the drilled position
+   * @param memberIds   the list of members for the drilled position
    * @return the CellSet result
    */
   @POST
@@ -79,8 +74,9 @@ public class QueryController
 
   /**
    * Undrills (collapse) a position
+   *
    * @param axisOrdinal the axis for the position to collapse
-   * @param memberIds the list of members for the position to collapse
+   * @param memberIds   the list of members for the position to collapse
    * @return the CellSet result
    */
   @POST
@@ -98,7 +94,8 @@ public class QueryController
 
   /**
    * Adds a new hierarchy to a query axis
-   * @param axisOrdinal the axis where the hierarchy is to be added.
+   *
+   * @param axisOrdinal   the axis where the hierarchy is to be added.
    * @param hierarchyName the unique name of the hierarchy to add.
    * @return the CellSet result
    */
@@ -128,15 +125,15 @@ public class QueryController
     QueryHierarchy hierarchy = _query.getHierarchy(hierarchyName);
     QueryAxis axis = _query.getAxis(Axis.Factory.forOrdinal(targetAxisOrdinal));
     int hierarchySrcPos = axis.getHierarchies().indexOf(hierarchy);
-    if ( hierarchySrcPos < 0 ) {
+    if (hierarchySrcPos < 0) {
       axis.addHierarchy(hierarchy);
-      hierarchySrcPos = axis.getHierarchies().size()-1;
+      hierarchySrcPos = axis.getHierarchies().size() - 1;
     }
-    if ( targetPos > hierarchySrcPos) {
-      for(; targetPos > hierarchySrcPos; ++hierarchySrcPos ) {
+    if (targetPos > hierarchySrcPos) {
+      for (; targetPos > hierarchySrcPos; ++hierarchySrcPos) {
         axis.pushDown(hierarchySrcPos);
       }
-    } else if ( targetPos < hierarchySrcPos ) {
+    } else if (targetPos < hierarchySrcPos) {
       for (; targetPos < hierarchySrcPos; --hierarchySrcPos) {
         axis.pullUp(hierarchySrcPos);
       }
@@ -147,7 +144,8 @@ public class QueryController
 
   /**
    * Removes a hierarchy form an axis.
-   * @param axisOrdinal The axis where the hierarchy is to be removed.
+   *
+   * @param axisOrdinal   The axis where the hierarchy is to be removed.
    * @param hierarchyName The unique name of the hierarchy to be removed.
    * @return the CellSet result
    */
@@ -164,6 +162,7 @@ public class QueryController
 
   /**
    * All the hierarchies in the cube used by the current query.
+   *
    * @return The list of hierarchies
    */
   @GET
@@ -179,45 +178,13 @@ public class QueryController
   }
 
   /**
-   * Helper to execute the current query.
-   * @return the CellSet result.
-   */
-  private QueryCellSet doExecuteQuery() {
-    try {
-      return new QueryCellSet(_query, _query.execute());
-    } catch (OlapException e) {
-      throw new WebServiceException(e);
-    }
-  }
-
-  /**
-   * Helper to parse a list of member unique names into the corresponding list of members.
-   * @param memberIds the list of member unique names.
-   * @return The corresponding list of members.
-   */
-  private Member[] parsePosition(final List<String> memberIds) {
-    try {
-      Cube cube = _query.getCube();
-      Member[] members = new Member[memberIds.size()];
-      for (int i = 0; i < members.length; ++i) {
-        members[i] = cube.lookupMember(IdentifierNode.parseIdentifier(memberIds.get(i)).getSegmentList());
-      }
-      return members;
-    } catch (OlapException e) {
-      throw new WebServiceException(e);
-    }
-  }
-
-  /**
    * Helper to initialize a query.
+   *
    * @return the new query.
    */
   private Query createQuery() {
     try {
-      Connection oCn = getDataSource().getConnection();
-      OlapConnection cn = oCn.unwrap(OlapConnection.class);
-      NamedList<Cube> cubes = cn.getOlapSchema().getCubes();
-      final Cube salesCube = cubes.get("Sales");
+      Cube salesCube = CubeProvider.getCube();
       Query q = new Query("q", salesCube);
       final QueryHierarchy storeDim = q.getHierarchy("Store");
       Member root = storeDim.getHierarchy().getRootMembers().get(0);
@@ -236,24 +203,41 @@ public class QueryController
       }
       q.getAxis(Axis.COLUMNS).addHierarchy(measuresHie);
       return q;
-    } catch (SQLException e) {
+    } catch (OlapException e) {
       throw new RuntimeException(e);
     }
   }
 
   /**
-   * Helper to retrieve the olap4j data source from JNDI
-   * @return the olap4j data source.
+   * Helper to execute the current query.
+   *
+   * @return the CellSet result.
    */
-  private DataSource getDataSource() {
-    DataSource ds;
+  private QueryCellSet doExecuteQuery() {
     try {
-      InitialContext ctxt = new InitialContext();
-      ds = (DataSource)ctxt.lookup("java:comp/env/jdbc/DB");
-    } catch (NamingException e) {
-      throw new RuntimeException(e);
+      return new QueryCellSet(_query, _query.execute());
+    } catch (OlapException e) {
+      throw new WebServiceException(e);
     }
-    return ds;
+  }
+
+  /**
+   * Helper to parse a list of member unique names into the corresponding list of members.
+   *
+   * @param memberIds the list of member unique names.
+   * @return The corresponding list of members.
+   */
+  private Member[] parsePosition(final List<String> memberIds) {
+    try {
+      Cube cube = _query.getCube();
+      Member[] members = new Member[memberIds.size()];
+      for (int i = 0; i < members.length; ++i) {
+        members[i] = cube.lookupMember(IdentifierNode.parseIdentifier(memberIds.get(i)).getSegmentList());
+      }
+      return members;
+    } catch (OlapException e) {
+      throw new WebServiceException(e);
+    }
   }
 
   /**
@@ -261,6 +245,9 @@ public class QueryController
    */
   private class HierarchyInfo implements Serializable
   {
+    private String _uniqueName;
+    private String _caption;
+
     public HierarchyInfo(Hierarchy h) {
       _uniqueName = h.getUniqueName();
       _caption = h.getCaption();
@@ -275,8 +262,5 @@ public class QueryController
     public String getCaption() {
       return _caption;
     }
-
-    private String _uniqueName;
-    private String _caption;
   }
 }
