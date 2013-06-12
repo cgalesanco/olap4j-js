@@ -2,23 +2,27 @@ package com.cgalesanco.olap4j;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.ws.WebServiceException;
 
 import com.cgalesanco.olap4j.json.QueryCellSet;
+import com.sun.jersey.spi.container.servlet.PerSession;
 import es.cgalesanco.olap4j.query.Query;
 import es.cgalesanco.olap4j.query.QueryAxis;
 import es.cgalesanco.olap4j.query.QueryHierarchy;
 import es.cgalesanco.olap4j.query.Selection;
 import org.olap4j.Axis;
 import org.olap4j.OlapException;
+import org.olap4j.impl.IdentifierParser;
 import org.olap4j.mdx.IdentifierNode;
 import org.olap4j.metadata.Cube;
 import org.olap4j.metadata.Hierarchy;
@@ -27,6 +31,7 @@ import org.olap4j.metadata.Member;
 /**
  * JAX-RS resource providing access to an olap4j query stored in the user's session.
  */
+@PerSession
 @Path("/query")
 public class QueryController
 {
@@ -175,6 +180,66 @@ public class QueryController
     return result;
   }
 
+  @GET
+  @Path("/hierarchies/{name}/roots")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<HierarchyMemberInfo> getHierarchyRoots(@PathParam("name") String name) {
+    try {
+    QueryHierarchy qh = _query.getHierarchy(name);
+    List<Member> roots = qh.getHierarchy().getRootMembers();
+    List<HierarchyMemberInfo> result = new ArrayList<HierarchyMemberInfo>(roots.size());
+    for(Member r : roots) {
+      result.add(new HierarchyMemberInfo(qh,r));
+    }
+    return result;
+    } catch(OlapException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  @GET
+  @Path("/hierarchies/{uniqueName}/children")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<HierarchyMemberInfo> getMemberChildren(@PathParam("uniqueName") String memberUnique) {
+    try {
+      Member m = _query.getCube().lookupMember(IdentifierParser.parseIdentifier(memberUnique));
+      QueryHierarchy qh = _query.getHierarchy(m.getHierarchy().getName());
+      List<? extends Member> children = m.getChildMembers();
+      List<HierarchyMemberInfo> result = new ArrayList<HierarchyMemberInfo>(children.size());
+      for(Member child : children) {
+        result.add(new HierarchyMemberInfo(qh,child));
+      }
+      return result;
+    } catch(OlapException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  @GET
+  @Path("/hierarchies/{memberUniqueName}/{op}/descendants")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<HierarchyMemberUpdate> applyOperation(
+    @PathParam("memberUniqueName") String uniqueName, @PathParam("op") String operation) {
+    Member m;
+    try {
+      m = _query.getCube().lookupMember(IdentifierParser.parseIdentifier(uniqueName));
+    QueryHierarchy qh = _query.getHierarchy(m.getHierarchy().getName());
+    if ( "include".equalsIgnoreCase(operation)) {
+      qh.include(Selection.Operator.DESCENDANTS, m);
+    } else {
+      qh.exclude(Selection.Operator.DESCENDANTS, m);
+    }
+    List<HierarchyMemberUpdate> updates = new LinkedList<HierarchyMemberUpdate>();
+    while( m != null ) {
+      updates.add(0, new HierarchyMemberUpdate(qh, m));
+      m = m.getParentMember();
+    }
+    return updates;
+    } catch (OlapException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Helper to initialize a query.
    *
@@ -259,6 +324,65 @@ public class QueryController
     @SuppressWarnings("unused")
     public String getCaption() {
       return _caption;
+    }
+  }
+
+  private class HierarchyMemberUpdate implements Serializable {
+    private String _name;
+    private boolean _included;
+
+    public HierarchyMemberUpdate(QueryHierarchy qh, Member m) {
+      _name = m.getName();
+      _included = qh.isIncluded(m);
+    }
+
+    public String getName() {
+      return _name;
+    }
+
+    public boolean isIncluded() {
+      return _included;
+    }
+  }
+
+  private class HierarchyMemberInfo implements Serializable {
+    private String _caption;
+    private String _name;
+    private String _uniqueName;
+    private boolean _isLeaf;
+    private boolean _isIncluded;
+
+    public HierarchyMemberInfo(QueryHierarchy qh, Member m) {
+      _caption = m.getCaption();
+      _name  = m.getName();
+      _uniqueName = m.getUniqueName();
+      try {
+        _isLeaf = m.getChildMemberCount() == 0;
+        _isIncluded = qh.isIncluded(m);
+
+      } catch (OlapException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public boolean isLeaf() {
+      return _isLeaf;
+    }
+
+    public String getName() {
+      return _name;
+    }
+
+    public String getCaption() {
+      return _caption;
+    }
+
+    public String getUniqueName() {
+      return _uniqueName;
+    }
+
+    public boolean isIncluded() {
+      return _isIncluded;
     }
   }
 }

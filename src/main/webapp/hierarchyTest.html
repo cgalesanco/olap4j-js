@@ -2,21 +2,74 @@
 <html>
 <head>
   <title></title>
+  <script src="js/lib/jquery.js"></script>
+  <script src="js/lib/bootstrap.js"></script>
+  <link href="lib/css/bootstrap.css" rel="stylesheet">
+  <link href="lib/css/bootstrap-responsive.css" rel="stylesheet">
+  <style type="text/css">
+    .included {
+      font-weight: bold;
+    }
+    .excluded {
+      color:lightgrey;
+    }
+  </style>
   <script src="js/lib/angular.js"></script>
   <script type="text/javascript">
     function TreeCtrl($scope, $http) {
-      $http.get('rest/metadata/hierarchy/Product/roots')
+      $http.get('rest/query/hierarchies/Product/roots')
         .success(function(data){
           $scope.data = data;
         });
 
       function getChildren(node) {
         var result = [];
-        $http.get('rest/metadata/member/'+encodeURIComponent(node.uniqueName)+'/children')
+        $http.get('rest/query/hierarchies/'+encodeURIComponent(node.uniqueName)+'/children')
           .success(function(data){
             result.push.apply(result,data);
           });
         return result;
+      }
+
+      $scope.expandBtnClass = function(node){
+        return node.expanded ? "icon-minus" : "icon-plus";
+      }
+
+      $scope.labelClass = function(node) {
+        return node.included ? "included" : "excluded";
+      }
+
+      $scope.defaultBtnClass = function(node) {
+        return node.included ? "icon-remove" : "icon-ok";
+      }
+
+      $scope.toggleDescendants = function(node) {
+        var op = node.included ? "exclude" : "include"
+
+        function setIncluded(node) {
+          node.included = this.included
+          angular.forEach(node.children, setIncluded, node);
+        }
+
+        $http.get('rest/query/hierarchies/'+encodeURIComponent(node.uniqueName)+'/'+op+'/descendants')
+          .success(function(data){
+            var current = $scope.data;
+            var last;
+            angular.forEach(data,function(nodeState){
+              var i = 0;
+              while( i < current.length && current[i].name !== nodeState.name ) {
+                i++;
+              }
+              if ( i >= current.length ) {
+                return;
+              }
+              last = current[i];
+              last.included = nodeState.included
+              current = last.children
+            });
+
+            angular.forEach(current,setIncluded,last);
+          });
       }
 
       $scope.toggleExpand = function(node){
@@ -39,10 +92,29 @@
 </head>
 <body data-ng-app>
   <script type="text/ng-template" id="treeNode">
-    <button type="button" data-ng-hide="node.leaf" data-ng-click="toggleExpand(node)">
-      <span data-ng-hide="node.expanded">+</span><span data-ng-show="node.expanded">-</span></button>{{node.name}}
-    <ul data-ng-hide="node.leaf || node.expanded==false"><li data-ng-repeat="node in node.children" data-ng-include="'treeNode'"></li></ul>
+    <i data-ng-hide="node.leaf" data-ng-click="toggleExpand(node)" data-ng-class="expandBtnClass(node)" style="font-size:smaller"></i>
+    <div class="btn-group">
+      <button class="btn btn-mini" data-ng-click="toggleDescendants(node)"><i data-ng-class="defaultBtnClass(node)"></i></button>
+      <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a tabindex="-1" href="#"><b>Include Descendants</b></a></li>
+        <li><a tabindex="-1" href="#">Include Member</a></li>
+        <li><a tabindex="-1" href="#">Include Children</a></li>
+        <li><a tabindex="-1" href="#">Include Level</a></li>
+        <li class="divider"></li>
+        <li><a tabindex="-1" href="#">Exclude Descendants</a></li>
+        <li><a tabindex="-1" href="#">Exclude Member</a></li>
+        <li><a tabindex="-1" href="#">Exclude Children</a></li>
+        <li><a tabindex="-1" href="#">Exclude Level</a></li>
+      </ul>
+    </div>
+    <span data-ng-class="labelClass(node)">{{node.name}}</span>
+    <ul data-ng-hide="node.leaf || node.expanded==false"><li data-ng-repeat="node in node.children" data-ng-include="'treeNode'" style="list-style-type:none"></li></ul>
   </script>
-  <ul data-ng-controller="TreeCtrl"><li data-ng-repeat="node in data" data-ng-include="'treeNode'"></li></ul>
+
+
+  <ul data-ng-controller="TreeCtrl"><li data-ng-repeat="node in data" data-ng-include="'treeNode'" style="list-style-type:none"></ul>
 </body>
 </html>
