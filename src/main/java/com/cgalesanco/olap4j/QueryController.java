@@ -2,8 +2,10 @@ package com.cgalesanco.olap4j;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -330,39 +332,24 @@ public class QueryController
   private class HierarchyMemberUpdate implements Serializable {
     private String _name;
     private boolean _included;
+    private boolean _isLeaf;
+    private Map<Selection.Operator,Character> _includeOps;
+    private Map<Selection.Operator,Character> _excludeOps;
 
     public HierarchyMemberUpdate(QueryHierarchy qh, Member m) {
       _name = m.getName();
       _included = qh.isIncluded(m);
-    }
+      _includeOps = new EnumMap<Selection.Operator, Character>(Selection.Operator.class);
+      _excludeOps = new EnumMap<Selection.Operator, Character>(Selection.Operator.class);
 
-    public String getName() {
-      return _name;
-    }
-
-    public boolean isIncluded() {
-      return _included;
-    }
-  }
-
-  private class HierarchyMemberInfo implements Serializable {
-    private String _caption;
-    private String _name;
-    private String _uniqueName;
-    private boolean _isLeaf;
-    private boolean _isIncluded;
-
-    public HierarchyMemberInfo(QueryHierarchy qh, Member m) {
-      _caption = m.getCaption();
-      _name  = m.getName();
-      _uniqueName = m.getUniqueName();
       try {
         _isLeaf = m.getChildMemberCount() == 0;
-        _isIncluded = qh.isIncluded(m);
-
       } catch (OlapException e) {
         throw new RuntimeException(e);
       }
+      setAllowedOps(qh, Selection.Operator.MEMBER, m, _isLeaf);
+      setAllowedOps(qh, Selection.Operator.CHILDREN, m, _isLeaf);
+      setAllowedOps(qh, Selection.Operator.DESCENDANTS, m, _isLeaf);
     }
 
     public boolean isLeaf() {
@@ -373,6 +360,57 @@ public class QueryController
       return _name;
     }
 
+    public boolean isIncluded() {
+      return _included;
+    }
+
+    public Map<Selection.Operator, Character> getExcludeOps() {
+      return _excludeOps;
+    }
+
+    public Map<Selection.Operator, Character> getIncludeOps() {
+      return _includeOps;
+    }
+
+    private void setAllowedOps(QueryHierarchy qh, Selection.Operator op, Member m, boolean isLeaf) {
+      if ( op != Selection.Operator.MEMBER && isLeaf ) {
+        _includeOps.put(op, null);
+        _excludeOps.put(op, null);
+        return;
+      }
+
+      Selection.Sign effectiveSign = qh.getEffectiveSignAt(m,op);
+      boolean scopeOverride;
+      switch(op) {
+        case MEMBER:
+          scopeOverride = false;
+          break;
+        case CHILDREN:
+          scopeOverride = qh.hasOverridingChildren(m);
+          break;
+        case DESCENDANTS:
+          scopeOverride = qh.hasOverridingDescendants(m);
+          break;
+        default:
+          throw new IllegalArgumentException();
+      }
+
+      _includeOps.put(op, effectiveSign != Selection.Sign.INCLUDE || scopeOverride ? 'A' : null);
+      _excludeOps.put(op, effectiveSign != Selection.Sign.EXCLUDE || scopeOverride ? 'A' : null);
+    }
+
+  }
+
+  private class HierarchyMemberInfo extends HierarchyMemberUpdate {
+    private String _caption;
+    private String _uniqueName;
+
+    public HierarchyMemberInfo(QueryHierarchy qh, Member m) {
+      super(qh,m);
+      _caption = m.getCaption();
+      _uniqueName = m.getUniqueName();
+    }
+
     public String getCaption() {
       return _caption;
     }
@@ -381,8 +419,5 @@ public class QueryController
       return _uniqueName;
     }
 
-    public boolean isIncluded() {
-      return _isIncluded;
-    }
   }
 }

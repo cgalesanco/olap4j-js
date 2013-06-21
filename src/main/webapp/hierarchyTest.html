@@ -13,6 +13,9 @@
     .excluded {
       color:lightgrey;
     }
+    .dropdown-menu > li.defaultMenu > a {
+      font-weight:bold;
+    }
   </style>
   <script src="js/lib/angular.js"></script>
   <script type="text/javascript">
@@ -33,25 +36,43 @@
 
       $scope.expandBtnClass = function(node){
         return node.expanded ? "icon-minus" : "icon-plus";
-      }
+      };
 
       $scope.labelClass = function(node) {
         return node.included ? "included" : "excluded";
-      }
+      };
 
       $scope.defaultBtnClass = function(node) {
         return node.included ? "icon-remove" : "icon-ok";
-      }
+      };
 
       $scope.toggleDescendants = function(node) {
-        var op = node.included ? "exclude" : "include"
+        $scope.executeDescendants(node, {op:(node.included ? "exclude" : "include")});
+      };
+
+      $scope.includeDescendants = function(node) {
+        $scope.executeDescendants(node, {op:'include'});
+      };
+
+      $scope.excludeDescendants = function(node) {
+        $scope.executeDescendants(node, {op:'exclude'});
+      };
+
+      $scope.executeDescendants = function(node, op) {
+        node.included ? "exclude" : "include"
 
         function setIncluded(node) {
-          node.included = this.included
-          angular.forEach(node.children, setIncluded, node);
+          node.included = this.op === "include";
+          var inverseOps = node.included ? node.excludeOps : node.includeOps;
+          var directOps = node.included ? node.includeOps : node.excludeOps;
+          directOps.DESCENDANTS = directOps.CHILDREN = directOps.MEMBER = false;
+          inverseOps.DESCENDANTS = inverseOps.CHILDREN = !node.leaf;
+          inverseOps.MEMBER = true;
+
+          angular.forEach(node.children, setIncluded, {op:op});
         }
 
-        $http.get('rest/query/hierarchies/'+encodeURIComponent(node.uniqueName)+'/'+op+'/descendants')
+        $http.get('rest/query/hierarchies/'+encodeURIComponent(node.uniqueName)+'/'+op.op+'/descendants')
           .success(function(data){
             var current = $scope.data;
             var last;
@@ -64,13 +85,19 @@
                 return;
               }
               last = current[i];
-              last.included = nodeState.included
+              last.included = nodeState.included;
+              last.includeOps = nodeState.includeOps;
+              last.excludeOps = nodeState.excludeOps;
               current = last.children
             });
 
-            angular.forEach(current,setIncluded,last);
+            angular.forEach(current,setIncluded,{op:(last.included ? "include" : "exclude")});
           });
-      }
+      };
+
+      $scope.defaultMenuClass = function(v) {
+        return v ? "defaultMenu" : ""
+      };
 
       $scope.toggleExpand = function(node){
         if ( node.leaf ) {
@@ -85,7 +112,7 @@
           }
           node.expanded = true;
         }
-      }
+      };
     }
 
   </script>
@@ -94,19 +121,21 @@
   <script type="text/ng-template" id="treeNode">
     <i data-ng-hide="node.leaf" data-ng-click="toggleExpand(node)" data-ng-class="expandBtnClass(node)" style="font-size:smaller"></i>
     <div class="btn-group">
-      <button class="btn btn-mini" data-ng-click="toggleDescendants(node)"><i data-ng-class="defaultBtnClass(node)"></i></button>
+      <button class="btn btn-mini" data-ng-click="includeDescendants(node)"><i data-ng-class="defaultBtnClass(node)"></i></button>
       <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
-        <li><a tabindex="-1" href="#"><b>Include Descendants</b></a></li>
-        <li><a tabindex="-1" href="#">Include Member</a></li>
-        <li><a tabindex="-1" href="#">Include Children</a></li>
+        <li data-ng-class="defaultMenuClass(!node.included)"
+            data-ng-show="node.includeOps.DESCENDANTS"><a tabindex="-1" href="#" data-ng-click="includeDescendants(node)">Include Descendants</a></li>
+        <li data-ng-show="node.includeOps.MEMBER"><a tabindex="-1" href="#">Include Member</a></li>
+        <li data-ng-show="node.includeOps.CHILDREN"><a tabindex="-1" href="#">Include Children</a></li>
         <li><a tabindex="-1" href="#">Include Level</a></li>
         <li class="divider"></li>
-        <li><a tabindex="-1" href="#">Exclude Descendants</a></li>
-        <li><a tabindex="-1" href="#">Exclude Member</a></li>
-        <li><a tabindex="-1" href="#">Exclude Children</a></li>
+        <li data-ng-class="defaultMenuClass(node.included)"
+            data-ng-show="node.excludeOps.DESCENDANTS"><a tabindex="-1" href="#" data-ng-click="toggleDescendants(node)">Exclude Descendants</a></li>
+        <li data-ng-show="node.excludeOps.MEMBER"><a tabindex="-1" href="#">Exclude Member</a></li>
+        <li data-ng-show="node.excludeOps.CHILDREN"><a tabindex="-1" href="#">Exclude Children</a></li>
         <li><a tabindex="-1" href="#">Exclude Level</a></li>
       </ul>
     </div>
